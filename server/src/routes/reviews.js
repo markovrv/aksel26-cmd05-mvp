@@ -78,7 +78,89 @@ router.post("/", authenticateToken, async (req, res) => {
 	}
 });
 
-// Получить отзывы предприятия (публично, только модерация)
+// Получить свои отзывы (b2c)
+router.get("/my", authenticateToken, async (req, res) => {
+	try {
+		const reviews = await dbAll(
+			`
+	      SELECT r.*, u.full_name as user_name,
+	             e.title as excursion_title, ent.name as enterprise_name
+	      FROM reviews r
+	      JOIN users u ON r.user_id = u.id
+	      JOIN bookings b ON r.booking_id = b.id
+	      JOIN slots s ON b.slot_id = s.id
+	      JOIN excursions e ON s.excursion_id = e.id
+	      JOIN enterprises ent ON e.enterprise_id = ent.id
+	      WHERE r.user_id = ?
+	      ORDER BY r.created_at DESC
+	    `,
+			[req.user.id],
+		);
+
+		res.json(reviews);
+	} catch (err) {
+		console.error("Ошибка получения своих отзывов:", err);
+		res.status(500).json({ error: "Ошибка при получении отзывов" });
+	}
+});
+
+// Обновить свой отзыв (b2c)
+router.put("/:id", authenticateToken, async (req, res) => {
+	try {
+		const { rating, comment } = req.body;
+
+		if (rating && (rating < 1 || rating > 5)) {
+			return res.status(400).json({ error: "Рейтинг должен быть от 1 до 5" });
+		}
+
+		const review = await dbGet(
+			"SELECT * FROM reviews WHERE id = ? AND user_id = ?",
+			[req.params.id, req.user.id],
+		);
+
+		if (!review) {
+			return res.status(404).json({ error: "Отзыв не найден" });
+		}
+
+		// При обновлении сбрасываем модерацию
+		await dbRun(
+			`UPDATE reviews SET rating = ?, comment = ?, is_moderated = 0 WHERE id = ?`,
+			[rating || review.rating, comment !== undefined ? comment : review.comment, req.params.id],
+		);
+
+		res.json({ message: "Отзыв обновлён, отправлен на повторную модерацию" });
+	} catch (err) {
+		console.error("Ошибка обновления отзыва:", err);
+		res.status(500).json({ error: "Ошибка при обновлении отзыва" });
+	}
+});
+
+// Удалить свой отзыв (b2c) или любой (admin)
+router.delete("/:id", authenticateToken, async (req, res) => {
+	try {
+		let review;
+		if (req.user.role === "admin") {
+			review = await dbGet("SELECT * FROM reviews WHERE id = ?", [req.params.id]);
+		} else {
+			review = await dbGet(
+				"SELECT * FROM reviews WHERE id = ? AND user_id = ?",
+				[req.params.id, req.user.id],
+			);
+		}
+
+		if (!review) {
+			return res.status(404).json({ error: "Отзыв не найден" });
+		}
+
+		await dbRun("DELETE FROM reviews WHERE id = ?", [req.params.id]);
+		res.json({ message: "Отзыв удалён" });
+	} catch (err) {
+		console.error("Ошибка удаления отзыва:", err);
+		res.status(500).json({ error: "Ошибка при удалении отзыва" });
+	}
+});
+
+// Получить отзывы предприятия (публично, только прошедшие модерацию)
 router.get("/:enterprise_id", async (req, res) => {
 	try {
 		const reviews = await dbAll(
@@ -142,7 +224,7 @@ router.patch(
 				res.json({ message: "Отзыв одобрен" });
 			} else {
 				await dbRun("DELETE FROM reviews WHERE id = ?", [req.params.id]);
-				res.json({ message: "Отзыв отклонён" });
+				res.json({ message: "Отзыв отклонён и удалён" });
 			}
 		} catch (err) {
 			console.error("Ошибка модерации:", err);

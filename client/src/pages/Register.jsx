@@ -91,17 +91,17 @@ function Register({ showToast }) {
 	};
 
 	return (
-		<div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4">
+		<div className="min-h-screen flex items-center justify-center py-12 px-4 bg-[#F5F3FF]">
 			<div className="max-w-md w-full">
-				<div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-					<h1 className="text-2xl font-bold text-center mb-2">Регистрация</h1>
-					<p className="text-gray-500 text-center mb-8">
+				<div className="bg-white rounded-2xl shadow-card border border-[#E9D5FF] p-8">
+					<h1 className="text-2xl font-bold text-[#1F2937] text-center mb-2">Регистрация</h1>
+					<p className="text-[#6B7280] text-center mb-8">
 						Создайте аккаунт для бронирования экскурсий
 					</p>
 
 					<form onSubmit={handleSubmit} className="space-y-4">
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
+							<label className="block text-sm font-medium text-[#1F2937] mb-1">
 								Email *
 							</label>
 							<input
@@ -109,12 +109,12 @@ function Register({ showToast }) {
 								value={formData.email}
 								onChange={(e) => handleChange("email", e.target.value)}
 								placeholder="example@mail.ru"
-								className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+								className="w-full border border-[#D1D5DB] rounded-xl px-4 py-3 text-[#1F2937] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-[#6D28D9] transition-all duration-150"
 							/>
 						</div>
 
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
+							<label className="block text-sm font-medium text-[#1F2937] mb-1">
 								Пароль *
 							</label>
 							<input
@@ -122,27 +122,25 @@ function Register({ showToast }) {
 								value={formData.password}
 								onChange={(e) => handleChange("password", e.target.value)}
 								placeholder="Минимум 6 символов"
-								className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+								className="w-full border border-[#D1D5DB] rounded-xl px-4 py-3 text-[#1F2937] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-[#6D28D9] transition-all duration-150"
 							/>
 						</div>
 
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
+							<label className="block text-sm font-medium text-[#1F2937] mb-1">
 								Подтверждение пароля *
 							</label>
 							<input
 								type="password"
 								value={formData.confirmPassword}
-								onChange={(e) =>
-									handleChange("confirmPassword", e.target.value)
-								}
+								onChange={(e) => handleChange("confirmPassword", e.target.value)}
 								placeholder="Повторите пароль"
-								className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+								className="w-full border border-[#D1D5DB] rounded-xl px-4 py-3 text-[#1F2937] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-[#6D28D9] transition-all duration-150"
 							/>
 						</div>
 
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
+							<label className="block text-sm font-medium text-[#1F2937] mb-1">
 								ФИО *
 							</label>
 							<input
@@ -150,22 +148,20 @@ function Register({ showToast }) {
 								value={formData.full_name}
 								onChange={(e) => handleChange("full_name", e.target.value)}
 								placeholder="Иванов Иван Иванович"
-								className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+								className="w-full border border-[#D1D5DB] rounded-xl px-4 py-3 text-[#1F2937] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-[#6D28D9] transition-all duration-150"
 							/>
 						</div>
 
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
+							<label className="block text-sm font-medium text-[#1F2937] mb-1">
 								Телефон *
 							</label>
 							<input
 								type="tel"
 								value={formData.phone}
-								onChange={(e) =>
-									handleChange("phone", formatPhone(e.target.value))
-								}
+								onChange={(e) => handleChange("phone", formatPhone(e.target.value))}
 								placeholder="+7 (999) 123-45-67"
-								className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent"
+								className="w-full border border-[#D1D5DB] rounded-xl px-4 py-3 text-[#1F2937] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-[#6D28D9] transition-all duration-150"
 							/>
 						</div>
 
@@ -173,19 +169,17 @@ function Register({ showToast }) {
 							<input
 								type="checkbox"
 								checked={formData.consent_to_pd}
-								onChange={(e) =>
-									handleChange("consent_to_pd", e.target.checked)
-								}
-								className="mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+								onChange={(e) => handleChange("consent_to_pd", e.target.checked)}
+								className="mt-1 w-5 h-5 rounded border-[#D1D5DB] text-[#6D28D9] focus:ring-[#A855F7]"
 							/>
-							<span className="text-sm text-gray-600">
+							<span className="text-sm text-[#6B7280]">
 								Я согласен на обработку персональных данных в соответствии с
 								политикой конфиденциальности *
 							</span>
 						</label>
 
 						{error && (
-							<div className="p-3 bg-red-50 text-red-600 rounded-xl text-sm">
+							<div className="p-3 bg-[#FEE2E2] text-[#DC2626] rounded-xl text-sm">
 								{error}
 							</div>
 						)}
@@ -193,18 +187,18 @@ function Register({ showToast }) {
 						<button
 							type="submit"
 							disabled={loading}
-							className="w-full py-3 bg-accent text-white rounded-xl font-semibold hover:bg-accent-hover transition-colors disabled:opacity-50"
+							className="w-full bg-[#6D28D9] hover:bg-[#7C3AED] text-white font-semibold px-6 py-3 rounded-xl shadow-btn transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:shadow-none"
 						>
 							{loading ? "Регистрация..." : "Зарегистрироваться"}
 						</button>
 					</form>
 
 					<div className="mt-6 text-center">
-						<p className="text-gray-500">
+						<p className="text-[#6B7280]">
 							Уже есть аккаунт?{" "}
 							<Link
 								to="/login"
-								className="text-primary font-medium hover:underline"
+								className="text-[#6D28D9] font-medium hover:text-[#7C3AED]"
 							>
 								Войти
 							</Link>

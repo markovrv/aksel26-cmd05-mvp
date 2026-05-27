@@ -9,10 +9,10 @@ function ExcursionCard({ excursion, showBadge }) {
 			: "https://images.unsplash.com/photo-1565514020179-026b92b84bb6?w=800");
 
 	return (
-		<article className="card card-hover excursion-card">
+		<article className="bg-white rounded-2xl shadow-card border border-[#E9D5FF] overflow-hidden hover:shadow-hover transition-shadow cursor-pointer excursion-card">
 			{showBadge && (
 				<div className="excursion-badge">
-					<span className="badge badge-info">Популярное</span>
+					<span className="bg-[#DBEAFE] text-[#1D4ED8] text-xs font-semibold px-3 py-1 rounded-full">Популярное</span>
 				</div>
 			)}
 			<img
@@ -94,7 +94,7 @@ function ExcursionCard({ excursion, showBadge }) {
 					</div>
 					<Link
 						to={`/excursion/${excursion.id}`}
-						className="btn btn-primary btn-sm"
+						className="bg-[#6D28D9] hover:bg-[#7C3AED] text-white font-semibold px-4 py-2 rounded-xl shadow-btn transition-all duration-200 active:scale-95 text-sm"
 					>
 						Подробнее
 					</Link>

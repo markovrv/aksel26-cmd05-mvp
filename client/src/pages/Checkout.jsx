@@ -13,16 +13,13 @@ function Checkout({ showToast }) {
 	const [loading, setLoading] = useState(false);
 	const [checkoutData, setCheckoutData] = useState(null);
 
-	// Данные участника
 	const [fullName, setFullName] = useState("");
 	const [phone, setPhone] = useState("");
 
-	// Сувениры
 	const [souvenirs, setSouvenirs] = useState([]);
-	const [cartItems, setCartItems] = useState({}); // { souvenir_id: quantity }
-	const [personalization, setPersonalization] = useState({}); // { souvenir_id: text }
+	const [cartItems, setCartItems] = useState({});
+	const [personalization, setPersonalization] = useState({});
 
-	// Оплата
 	const [consentPD, setConsentPD] = useState(false);
 	const [bookingId, setBookingId] = useState(null);
 	const [souvenirTotal, setSouvenirTotal] = useState(0);
@@ -78,7 +75,6 @@ function Checkout({ showToast }) {
 		});
 	};
 
-	// Рассчитываем стоимость сувениров
 	useEffect(() => {
 		let total = 0;
 		souvenirs.forEach((s) => {
@@ -113,7 +109,6 @@ function Checkout({ showToast }) {
 
 	const handlePaymentSuccess = async (result) => {
 		try {
-			// Если есть сувениры, создаём заказы
 			if (Object.keys(cartItems).length > 0) {
 				const orders = Object.entries(cartItems).map(
 					([souvenir_id, quantity]) => ({
@@ -174,7 +169,7 @@ function Checkout({ showToast }) {
 			});
 
 			setBookingId(booking.booking_id);
-			setStep(4); // Переходим к оплате
+			setStep(4);
 		} catch (err) {
 			showToast(err.message || "Ошибка создания бронирования", "error");
 		} finally {
@@ -200,23 +195,26 @@ function Checkout({ showToast }) {
 	}
 
 	return (
-		<div className="min-h-screen py-8 px-4">
+		<div className="min-h-screen py-8 px-4 bg-[#F5F3FF]">
 			<div className="max-w-3xl mx-auto">
 				{/* Прогресс */}
 				<div className="flex items-center justify-center gap-4 mb-8">
 					{[1, 2, 3].map((s) => (
 						<React.Fragment key={s}>
 							<div
-								className={`
-                w-8 h-8 rounded-full flex items-center justify-center font-semibold
-                ${step >= s ? "bg-primary text-white" : "bg-gray-200 text-gray-500"}
-              `}
+								className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+									step >= s
+										? "bg-[#6D28D9] text-white shadow-btn"
+										: "bg-[#E9D5FF] text-[#6B7280]"
+								}`}
 							>
 								{s}
 							</div>
 							{s < 3 && (
 								<div
-									className={`w-16 h-1 rounded ${step > s ? "bg-primary" : "bg-gray-200"}`}
+									className={`w-16 h-1 rounded ${
+										step > s ? "bg-[#6D28D9]" : "bg-[#E9D5FF]"
+									}`}
 								/>
 							)}
 						</React.Fragment>
@@ -225,12 +223,12 @@ function Checkout({ showToast }) {
 
 				{/* Шаг 1: Данные участника */}
 				{step === 1 && (
-					<div className="bg-white rounded-2xl p-6">
-						<h2 className="text-2xl font-bold mb-6">Данные участника</h2>
+					<div className="bg-white rounded-2xl shadow-card border border-[#E9D5FF] p-6">
+						<h2 className="text-2xl font-bold text-[#1F2937] mb-6">Данные участника</h2>
 
 						<div className="space-y-4">
 							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-1">
+								<label className="block text-sm font-medium text-[#1F2937] mb-1">
 									ФИО *
 								</label>
 								<input
@@ -238,12 +236,12 @@ function Checkout({ showToast }) {
 									value={fullName}
 									onChange={(e) => setFullName(e.target.value)}
 									placeholder="Иванов Иван Иванович"
-									className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent"
+									className="w-full border border-[#D1D5DB] rounded-xl px-4 py-3 text-[#1F2937] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-[#6D28D9] transition-all duration-150"
 								/>
 							</div>
 
 							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-1">
+								<label className="block text-sm font-medium text-[#1F2937] mb-1">
 									Телефон *
 								</label>
 								<input
@@ -251,19 +249,19 @@ function Checkout({ showToast }) {
 									value={phone}
 									onChange={(e) => setPhone(formatPhone(e.target.value))}
 									placeholder="+7 (999) 123-45-67"
-									className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-transparent"
+									className="w-full border border-[#D1D5DB] rounded-xl px-4 py-3 text-[#1F2937] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-[#6D28D9] transition-all duration-150"
 								/>
 							</div>
 
 							<div>
-								<label className="block text-sm font-medium text-gray-700 mb-1">
+								<label className="block text-sm font-medium text-[#1F2937] mb-1">
 									Email
 								</label>
 								<input
 									type="email"
 									value={user?.email || ""}
 									disabled
-									className="w-full border border-gray-200 rounded-xl px-4 py-2.5 bg-gray-50"
+									className="w-full border border-[#E9D5FF] rounded-xl px-4 py-3 bg-[#F5F3FF] text-[#6B7280]"
 								/>
 							</div>
 						</div>
@@ -271,7 +269,7 @@ function Checkout({ showToast }) {
 						<div className="mt-6 flex justify-end">
 							<button
 								onClick={handleNextStep}
-								className="px-8 py-3 bg-accent text-white rounded-xl font-semibold hover:bg-accent-hover transition-colors"
+								className="bg-[#6D28D9] hover:bg-[#7C3AED] text-white font-semibold px-8 py-3 rounded-xl shadow-btn transition-all duration-200 active:scale-95"
 							>
 								Далее
 							</button>
@@ -281,11 +279,11 @@ function Checkout({ showToast }) {
 
 				{/* Шаг 2: Сувениры */}
 				{step === 2 && (
-					<div className="bg-white rounded-2xl p-6">
-						<h2 className="text-2xl font-bold mb-6">Брендированные сувениры</h2>
+					<div className="bg-white rounded-2xl shadow-card border border-[#E9D5FF] p-6">
+						<h2 className="text-2xl font-bold text-[#1F2937] mb-6">Брендированные сувениры</h2>
 
 						{souvenirs.length === 0 ? (
-							<div className="text-center py-8 text-gray-500">
+							<div className="text-center py-8 text-[#6B7280]">
 								<p>Сувениры не доступны для этого предприятия</p>
 							</div>
 						) : (
@@ -310,7 +308,7 @@ function Checkout({ showToast }) {
 																[souvenir.id]: e.target.value,
 															}))
 														}
-														className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none"
+														className="w-full border border-[#D1D5DB] rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-[#6D28D9]"
 														rows={2}
 													/>
 												</div>
@@ -321,10 +319,10 @@ function Checkout({ showToast }) {
 						)}
 
 						{souvenirTotal > 0 && (
-							<div className="mt-6 p-4 bg-gray-50 rounded-xl">
+							<div className="mt-6 p-4 bg-[#F5F3FF] rounded-xl border border-[#E9D5FF]">
 								<div className="flex justify-between items-center">
-									<span className="font-medium">Стоимость сувениров:</span>
-									<span className="font-bold text-lg">
+									<span className="font-medium text-[#1F2937]">Стоимость сувениров:</span>
+									<span className="font-bold text-lg text-[#6D28D9]">
 										{souvenirTotal.toLocaleString()} ₽
 									</span>
 								</div>
@@ -334,13 +332,13 @@ function Checkout({ showToast }) {
 						<div className="mt-6 flex gap-4">
 							<button
 								onClick={() => setStep(1)}
-								className="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+								className="px-6 py-3 border-2 border-[#6D28D9] text-[#6D28D9] rounded-xl hover:bg-[#F5F3FF] transition-colors"
 							>
 								Назад
 							</button>
 							<button
 								onClick={handleNextStep}
-								className="flex-1 py-3 bg-accent text-white rounded-xl font-semibold hover:bg-accent-hover transition-colors"
+								className="flex-1 py-3 bg-[#6D28D9] hover:bg-[#7C3AED] text-white rounded-xl font-semibold shadow-btn transition-all duration-200 active:scale-95"
 							>
 								Пропустить
 							</button>
@@ -350,42 +348,40 @@ function Checkout({ showToast }) {
 
 				{/* Шаг 3: Оплата */}
 				{step >= 3 && (
-					<div className="bg-white rounded-2xl p-6">
-						<h2 className="text-2xl font-bold mb-6">Подтверждение и оплата</h2>
+					<div className="bg-white rounded-2xl shadow-card border border-[#E9D5FF] p-6">
+						<h2 className="text-2xl font-bold text-[#1F2937] mb-6">Подтверждение и оплата</h2>
 
 						{/* Детали заказа */}
-						<div className="bg-gray-50 rounded-xl p-4 mb-6">
-							<h4 className="font-medium mb-3">Детали заказа:</h4>
+						<div className="bg-[#F5F3FF] rounded-xl p-4 mb-6 border border-[#E9D5FF]">
+							<h4 className="font-medium text-[#1F2937] mb-3">Детали заказа:</h4>
 							<div className="space-y-2 text-sm">
 								<div className="flex justify-between">
-									<span className="text-gray-500">Экскурсия:</span>
-									<span>{checkoutData.excursion_title}</span>
+									<span className="text-[#6B7280]">Экскурсия:</span>
+									<span className="text-[#1F2937]">{checkoutData.excursion_title}</span>
 								</div>
 								<div className="flex justify-between">
-									<span className="text-gray-500">Дата:</span>
-									<span>
-										{new Date(checkoutData.slot_datetime).toLocaleString(
-											"ru-RU",
-										)}
+									<span className="text-[#6B7280]">Дата:</span>
+									<span className="text-[#1F2937]">
+										{new Date(checkoutData.slot_datetime).toLocaleString("ru-RU")}
 									</span>
 								</div>
 								<div className="flex justify-between">
-									<span className="text-gray-500">Участников:</span>
-									<span>{checkoutData.participants_count}</span>
+									<span className="text-[#6B7280]">Участников:</span>
+									<span className="text-[#1F2937]">{checkoutData.participants_count}</span>
 								</div>
 								<div className="flex justify-between">
-									<span className="text-gray-500">Цена за экскурсию:</span>
-									<span>{checkoutData.total_price.toLocaleString()} ₽</span>
+									<span className="text-[#6B7280]">Цена за экскурсию:</span>
+									<span className="text-[#1F2937]">{checkoutData.total_price.toLocaleString()} ₽</span>
 								</div>
 								{souvenirTotal > 0 && (
 									<div className="flex justify-between">
-										<span className="text-gray-500">Сувениры:</span>
-										<span>{souvenirTotal.toLocaleString()} ₽</span>
+										<span className="text-[#6B7280]">Сувениры:</span>
+										<span className="text-[#1F2937]">{souvenirTotal.toLocaleString()} ₽</span>
 									</div>
 								)}
-								<div className="flex justify-between font-bold text-lg pt-2 border-t">
-									<span>Итого:</span>
-									<span className="text-primary">
+								<div className="flex justify-between font-bold text-lg pt-2 border-t border-[#E9D5FF]">
+									<span className="text-[#1F2937]">Итого:</span>
+									<span className="text-[#6D28D9]">
 										{totalPrice.toLocaleString()} ₽
 									</span>
 								</div>
@@ -398,15 +394,13 @@ function Checkout({ showToast }) {
 								type="checkbox"
 								checked={consentPD}
 								onChange={(e) => setConsentPD(e.target.checked)}
-								className="mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+								className="mt-1 w-5 h-5 rounded border-[#D1D5DB] text-[#6D28D9] focus:ring-[#A855F7]"
 							/>
-							<span className="text-sm text-gray-600">
-								Я согласен на обработку персональных данных в соответствии с
-								политикой конфиденциальности
+							<span className="text-sm text-[#6B7280]">
+								Я согласен на обработку персональных данных
 							</span>
 						</label>
 
-						{/* Эмулятор оплаты — только после создания брони */}
 						{bookingId && (
 							<PaymentEmulator
 								bookingId={bookingId}
@@ -416,23 +410,20 @@ function Checkout({ showToast }) {
 							/>
 						)}
 
-						{/* Кнопка создания брони — только до создания */}
 						{!bookingId && (
 							<button
 								onClick={handleCreateBooking}
 								disabled={loading || !consentPD}
-								className="w-full mt-4 py-3 bg-accent text-white rounded-xl font-semibold hover:bg-accent-hover transition-colors disabled:opacity-50"
+								className="w-full mt-4 py-3 bg-[#6D28D9] hover:bg-[#7C3AED] text-white rounded-xl font-semibold shadow-btn transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:shadow-none"
 							>
-								{loading
-									? "Создание бронирования..."
-									: "Создать бронь и оплатить"}
+								{loading ? "Создание бронирования..." : "Создать бронь и оплатить"}
 							</button>
 						)}
 
 						<div className="mt-4 flex justify-start">
 							<button
 								onClick={() => setStep(2)}
-								className="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+								className="px-6 py-3 border-2 border-[#6D28D9] text-[#6D28D9] rounded-xl hover:bg-[#F5F3FF] transition-colors"
 							>
 								Назад
 							</button>

@@ -371,6 +371,49 @@ export async function moderateReview(id, data) {
 	return handleResponse(res);
 }
 
+export async function getMyReviews() {
+	const res = await fetch(`${API_BASE}/reviews/my`, {
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+	});
+	return handleResponse(res);
+}
+
+export async function updateReview(id, data) {
+	const res = await fetch(`${API_BASE}/reviews/${id}`, {
+		method: "PUT",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+		body: JSON.stringify(data),
+	});
+	return handleResponse(res);
+}
+
+export async function deleteReview(id) {
+	const res = await fetch(`${API_BASE}/reviews/${id}`, {
+		method: "DELETE",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+	});
+	return handleResponse(res);
+}
+
+// ============ ПРОФИЛЬ ============
+
+export async function updateProfile(data) {
+	const res = await fetch(`${API_BASE}/auth/profile`, {
+		method: "PUT",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+		body: JSON.stringify(data),
+	});
+	return handleResponse(res);
+}
+
+export async function deleteProfile() {
+	const res = await fetch(`${API_BASE}/auth/profile`, {
+		method: "DELETE",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+	});
+	return handleResponse(res);
+}
+
 // ============ УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ ============
 
 export async function getUsers() {

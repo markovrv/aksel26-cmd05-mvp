@@ -5,8 +5,8 @@ function AnalyticsChart({ data = [], loading }) {
 		return (
 			<div className="h-64 flex items-center justify-center">
 				<div className="text-center">
-					<div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-					<p className="text-gray-500">Загрузка графика...</p>
+					<div className="w-12 h-12 border-4 border-[#6D28D9] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+					<p className="text-[#6B7280]">Загрузка графика...</p>
 				</div>
 			</div>
 		);
@@ -14,10 +14,10 @@ function AnalyticsChart({ data = [], loading }) {
 
 	if (!data || data.length === 0) {
 		return (
-			<div className="h-64 flex items-center justify-center text-gray-500">
+			<div className="h-64 flex items-center justify-center text-[#6B7280]">
 				<div className="text-center">
 					<svg
-						className="w-16 h-16 mx-auto mb-4 text-gray-300"
+						className="w-16 h-16 mx-auto mb-4 text-[#A855F7]"
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
@@ -45,8 +45,8 @@ function AnalyticsChart({ data = [], loading }) {
 	};
 
 	return (
-		<div className="bg-white rounded-2xl border border-gray-200 p-6">
-			<h4 className="font-semibold text-lg mb-4">Посещаемость по месяцам</h4>
+		<div className="bg-white rounded-2xl border border-[#E9D5FF] shadow-card p-6">
+			<h4 className="font-semibold text-lg text-[#1F2937] mb-4">Посещаемость по месяцам</h4>
 			<div className="flex items-end justify-between gap-2 h-64">
 				{data.map((item, index) => {
 					const height = (item.visitors / maxValue) * maxHeight;
@@ -56,14 +56,14 @@ function AnalyticsChart({ data = [], loading }) {
 							className="flex-1 flex flex-col items-center gap-2"
 						>
 							<div
-								className="w-full bg-primary rounded-t-lg transition-all hover:bg-primary-hover relative group"
+								className="w-full bg-gradient-to-t from-[#6D28D9] to-[#A855F7] rounded-t-lg transition-all hover:opacity-80 relative group"
 								style={{ height: `${Math.max(height, 4)}px` }}
 							>
-								<div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+								<div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#1F2937] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
 									{item.visitors} посетителей
 								</div>
 							</div>
-							<span className="text-xs text-gray-500">
+							<span className="text-xs text-[#6B7280]">
 								{formatMonth(item.month)}
 							</span>
 						</div>

@@ -12,14 +12,16 @@
 - Эмуляция оплаты с тремя сценариями (успех, ошибка, таймаут)
 - Личный кабинет с историей бронирований и возможностью оставить отзыв
 - Отмена бронирований
+- Уведомления о статусе бронирований и заказов сувениров
 
 ### Для предприятий (B2B)
 - Панель управления заявками на экскурсии
 - Управление экскурсиями: создание, редактирование, активация/деактивация
-- Управление временными слотами
-- Управление сувенирами и обработка заказов (подтверждение/отклонение)
+- Управление временными слотами (создание, редактирование, удаление)
+- Управление сувенирами (добавление, редактирование) и обработка заказов (подтверждение/отклонение, отметка о выдаче)
 - Отметка о проведении экскурсии
 - Редактирование профиля предприятия
+- Просмотр и обработка уведомлений
 
 ### Для администратора
 - Создание и управление предприятиями
@@ -59,25 +61,78 @@
 
 ```
 industry-tourism/
-├── client/                          # React SPA (Vite)
-│   ├── src/
-│   │   ├── api.js                   # API-клиент
-│   │   ├── App.jsx                  # Роутер и защита маршрутов
-│   │   ├── context/AuthContext.jsx  # Контекст аутентификации
-│   │   ├── components/              # Переиспользуемые UI-компоненты
-│   │   └── pages/                   # Страницы приложения
-│   └── ...config files
-├── server/                          # Express-сервер
-│   ├── src/
-│   │   ├── index.js                 # Точка входа
-│   │   ├── db/                      # Схема БД, инициализация, seed
-│   │   ├── middleware/              # JWT-аутентификация, guards
-│   │   └── routes/                  # REST API (11 модулей)
-│   └── .env                         # Переменные окружения
-├── data/                            # Файл БД SQLite (.gitignored)
-├── docker-compose.yml               # Конфигурация Docker
-├── Dockerfile                       # Многостадийная сборка
-└── entrypoint.sh                    # init-db → seed → start
+├── client/                              # React SPA (Vite)
+│   ├── index.html                       # HTML-шаблон
+│   ├── package.json                     # Зависимости клиента
+│   ├── postcss.config.js                # Конфигурация PostCSS
+│   ├── tailwind.config.js               # Конфигурация Tailwind CSS
+│   ├── vite.config.js                   # Конфигурация Vite
+│   ├── public/                          # Статические файлы
+│   └── src/
+│       ├── main.jsx                     # Точка входа React
+│       ├── api.js                       # API-клиент
+│       ├── App.jsx                      # Роутер и защита маршрутов
+│       ├── index.css                    # Глобальные стили (Tailwind)
+│       ├── context/
+│       │   └── AuthContext.jsx          # Контекст аутентификации
+│       ├── components/                  # Переиспользуемые UI-компоненты
+│       │   ├── AnalyticsChart.jsx       # График аналитики
+│       │   ├── BookingStatusBadge.jsx   # Бейдж статуса бронирования
+│       │   ├── EnterpriseCard.jsx       # Карточка предприятия
+│       │   ├── ExcursionCard.jsx        # Карточка экскурсии
+│       │   ├── FilterPanel.jsx          # Панель фильтрации каталога
+│       │   ├── Footer.jsx               # Подвал
+│       │   ├── Navbar.jsx               # Навигационная панель
+│       │   ├── PaymentEmulator.jsx      # Эмулятор оплаты
+│       │   ├── ReviewForm.jsx           # Форма отзыва
+│       │   ├── ReviewList.jsx           # Список отзывов
+│       │   ├── SlotPicker.jsx           # Выбор временного слота
+│       │   ├── SouvenirCard.jsx         # Карточка сувенира
+│       │   └── Toast.jsx                # Всплывающие уведомления
+│       └── pages/                       # Страницы приложения
+│           ├── Home.jsx                 # Главная
+│           ├── Catalog.jsx              # Каталог экскурсий
+│           ├── Enterprise.jsx           # Страница предприятия
+│           ├── Excursion.jsx            # Детальная страница экскурсии
+│           ├── Checkout.jsx             # Оформление бронирования
+│           ├── PaymentResult.jsx        # Результат оплаты
+│           ├── AccountB2C.jsx           # Личный кабинет туриста
+│           ├── AccountB2B.jsx           # Личный кабинет предприятия
+│           ├── Admin.jsx                # Панель администратора
+│           ├── Analytics.jsx            # Дашборд министерства
+│           ├── Login.jsx                # Вход
+│           ├── Register.jsx             # Регистрация
+│           └── NotFound.jsx             # 404
+├── server/                              # Express-сервер
+│   ├── .env.example                     # Шаблон переменных окружения
+│   ├── package.json                     # Зависимости сервера
+│   └── src/
+│       ├── index.js                     # Точка входа
+│       ├── db/
+│       │   ├── db.js                    # Подключение к SQLite
+│       │   ├── schema.sql               # SQL-схема базы данных
+│       │   ├── init-db.js               # Инициализация схемы
+│       │   └── seed.js                  # Наполнение тестовыми данными
+│       ├── middleware/
+│       │   ├── auth.js                  # JWT-аутентификация
+│       │   └── roleGuard.js            # Guard для ролей (B2C, B2B, admin, ministry)
+│       └── routes/                      # REST API (11 модулей)
+│           ├── auth.js                  # Регистрация, логин, профиль
+│           ├── enterprises.js           # Предприятия
+│           ├── excursions.js            # Экскурсии
+│           ├── slots.js                 # Временные слоты (управление)
+│           ├── bookings.js              # Бронирования
+│           ├── payment.js               # Эмуляция оплаты
+│           ├── souvenirs.js             # Сувениры
+│           ├── souvenir_orders.js       # Заказы сувениров
+│           ├── reviews.js               # Отзывы (создание + модерация)
+│           ├── notifications.js         # Уведомления пользователей
+│           └── analytics.js             # Аналитика для министерства
+├── data/                                # Файл БД SQLite (.gitignored)
+├── docker-compose.yml                   # Конфигурация Docker
+├── Dockerfile                           # Многостадийная сборка
+├── entrypoint.sh                        # init-db → seed → start
+└── .gitignore
 ```
 
 ## Быстрый старт
@@ -125,27 +180,49 @@ npm run dev       # Запустить dev-сервер на порту 5173
 ### Предприятия
 - `GET /api/enterprises` — список активных предприятий (фильтры: город, поиск)
 - `GET /api/enterprises/:id` — детальная информация о предприятии
+- `POST /api/enterprises` — создание предприятия (admin)
+- `PATCH /api/enterprises/:id` — редактирование профиля предприятия (admin, b2b)
 
 ### Экскурсии
 - `GET /api/excursions` — список экскурсий (фильтры: город, дата, предприятие)
-- `GET /api/excursions/:id` — детальная информация с слотами, сувенирами, отзывами
+- `GET /api/excursions/:id` — детальная информация со слотами, сувенирами, отзывами
+- `POST /api/excursions` — создание экскурсии (b2b, admin)
+- `PATCH /api/excursions/:id` — редактирование экскурсии (b2b, admin)
+
+### Слоты
+- `POST /api/slots` — создание временного слота (b2b, admin)
+- `PATCH /api/slots/:id` — редактирование слота (b2b, admin)
+- `DELETE /api/slots/:id` — удаление слота (b2b, admin)
 
 ### Бронирования
 - `POST /api/bookings` — создание брони
 - `GET /api/bookings/my` — мои бронирования
 - `GET /api/bookings/:id` — детали бронирования
 - `PATCH /api/bookings/:id/cancel` — отмена бронирования
+- `PATCH /api/bookings/:id/status` — изменение статуса бронирования (b2b, admin)
+- `GET /api/bookings/enterprise/:enterpriseId` — бронирования предприятия (b2b, admin)
 
 ### Оплата
 - `POST /api/payment/process` — эмуляция оплаты (сценарии: success, fail, timeout)
 
 ### Сувениры
-- `GET /api/souvenirs/:enterprise_id` — список сувениров предприятия
+- `GET /api/souvenirs/:enterpriseId` — список сувениров предприятия
+- `POST /api/souvenirs` — создание сувенира (b2b, admin)
+- `PATCH /api/souvenirs/:id` — редактирование сувенира (b2b, admin)
+
+### Заказы сувениров
 - `POST /api/souvenir-orders` — создание заказа сувениров
+- `GET /api/souvenir-orders/:id` — детали заказа
+- `PATCH /api/souvenir-orders/:id/status` — изменение статуса заказа (b2b, admin)
 
 ### Отзывы
 - `POST /api/reviews` — создание отзыва
-- `GET /api/reviews/:enterprise_id` — опубликованные отзывы о предприятии
+- `GET /api/reviews/:enterpriseId` — опубликованные отзывы о предприятии
+- `PATCH /api/reviews/:id/moderate` — модерация отзыва (admin)
+
+### Уведомления
+- `GET /api/notifications` — список уведомлений пользователя
+- `PATCH /api/notifications/:id/read` — отметить уведомление как прочитанное
 
 ### Аналитика
 - `GET /api/analytics/summary` — сводная аналитика для министерства/админа

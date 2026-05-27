@@ -10,19 +10,18 @@ function SouvenirCard({
 	const hasPersonalization =
 		souvenir.allows_personalization === 1 ||
 		souvenir.allows_personalization === true;
-	const personalizationTypes = souvenir.personalization_type || [];
 
 	return (
-		<div className="bg-white rounded-2xl shadow-sm border border-[rgba(30,58,95,0.08)] overflow-hidden">
-			<div className="h-40 overflow-hidden bg-gray-100">
+		<div className="bg-white rounded-2xl border border-[#E9D5FF] shadow-card p-4">
+			<div className="h-40 overflow-hidden bg-[#F5F3FF] rounded-xl mb-3">
 				{souvenir.photo_url ? (
 					<img
 						src={souvenir.photo_url}
 						alt={souvenir.name}
-						className="w-full h-full object-cover"
+						className="w-full h-full object-contain"
 					/>
 				) : (
-					<div className="w-full h-full flex items-center justify-center text-gray-400">
+					<div className="w-full h-full flex items-center justify-center text-[#A855F7]">
 						<svg
 							className="w-12 h-12"
 							fill="none"
@@ -39,22 +38,22 @@ function SouvenirCard({
 					</div>
 				)}
 			</div>
-			<div className="p-4">
-				<h4 className="font-medium text-gray-900 mb-1 line-clamp-1">
+			<div>
+				<h4 className="font-semibold text-[#1F2937] text-sm mb-1 line-clamp-1">
 					{souvenir.name}
 				</h4>
 				{souvenir.description && (
-					<p className="text-gray-500 text-xs mb-2 line-clamp-2">
+					<p className="text-[#6B7280] text-xs mb-2 line-clamp-2">
 						{souvenir.description}
 					</p>
 				)}
 
 				<div className="flex items-center justify-between mb-3">
-					<span className="text-lg font-bold text-primary">
+					<span className="text-lg font-bold text-[#6D28D9]">
 						{souvenir.base_price.toLocaleString()} ₽
 					</span>
 					{hasPersonalization && (
-						<span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+						<span className="text-xs bg-[#E9D5FF] text-[#6D28D9] px-2 py-1 rounded-full">
 							🖊️ Персонализация
 						</span>
 					)}
@@ -63,13 +62,13 @@ function SouvenirCard({
 				{showControls && (
 					<div className="flex items-center gap-2">
 						{quantity > 0 ? (
-							<div className="flex items-center gap-2 w-full">
+							<div className="flex items-center gap-3 w-full">
 								<button
 									onClick={() => onRemove(souvenir.id)}
-									className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors"
+									className="w-8 h-8 rounded-full border border-[#D1D5DB] text-[#6B7280] hover:border-[#6D28D9] hover:text-[#6D28D9] font-bold flex items-center justify-center transition-colors"
 								>
 									<svg
-										className="w-5 h-5"
+										className="w-4 h-4"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -82,15 +81,15 @@ function SouvenirCard({
 										/>
 									</svg>
 								</button>
-								<span className="flex-1 text-center font-medium">
+								<span className="text-[#1F2937] font-semibold w-4 text-center flex-1">
 									{quantity}
 								</span>
 								<button
 									onClick={() => onAdd(souvenir)}
-									className="w-10 h-10 rounded-xl bg-accent hover:bg-accent-hover text-white flex items-center justify-center transition-colors"
+									className="w-8 h-8 rounded-full bg-[#6D28D9] text-white font-bold flex items-center justify-center hover:bg-[#7C3AED] transition-colors"
 								>
 									<svg
-										className="w-5 h-5"
+										className="w-4 h-4"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -107,7 +106,7 @@ function SouvenirCard({
 						) : (
 							<button
 								onClick={() => onAdd(souvenir)}
-								className="w-full py-2 border border-primary text-primary rounded-xl hover:bg-blue-50 transition-colors font-medium"
+								className="w-full py-2 border-2 border-[#6D28D9] text-[#6D28D9] rounded-xl hover:bg-[#F5F3FF] transition-colors font-medium"
 							>
 								Добавить
 							</button>

@@ -29,7 +29,7 @@ function Enterprise() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen py-8 px-4">
+			<div className="min-h-screen py-8 px-4 bg-[#F5F3FF]">
 				<div className="max-w-7xl mx-auto">
 					<div className="h-64 skeleton rounded-2xl mb-8"></div>
 					<div className="h-8 skeleton w-1/2 mb-4"></div>
@@ -46,12 +46,12 @@ function Enterprise() {
 
 	if (!enterprise) {
 		return (
-			<div className="min-h-screen py-8 px-4 flex items-center justify-center">
+			<div className="min-h-screen flex items-center justify-center py-8 px-4 bg-[#F5F3FF]">
 				<div className="text-center">
-					<h2 className="text-2xl font-bold text-gray-900 mb-2">
+					<h2 className="text-2xl font-bold text-[#1F2937] mb-2">
 						Предприятие не найдено
 					</h2>
-					<Link to="/catalog" className="text-primary hover:underline">
+					<Link to="/catalog" className="text-[#6D28D9] hover:underline">
 						Вернуться в каталог
 					</Link>
 				</div>
@@ -65,9 +65,9 @@ function Enterprise() {
 			: ["https://images.unsplash.com/photo-1565514020179-026b92b84bb6?w=800"];
 
 	return (
-		<div className="min-h-screen">
+		<div className="min-h-screen bg-[#F5F3FF]">
 			{/* Галерея */}
-			<div className="h-64 md:h-96 bg-gray-200 overflow-hidden">
+			<div className="h-64 md:h-96 bg-[#E9D5FF] overflow-hidden">
 				<img
 					src={photos[0]}
 					alt={enterprise.name}
@@ -77,45 +77,45 @@ function Enterprise() {
 
 			<div className="max-w-7xl mx-auto px-4 py-8">
 				{/* Информация */}
-				<div className="bg-white rounded-2xl border border-gray-100 p-6 mb-8">
+				<div className="bg-white rounded-2xl shadow-card border border-[#E9D5FF] p-6 mb-8">
 					<div className="flex items-start justify-between gap-4 mb-4">
 						<div>
-							<h1 className="text-3xl font-bold text-gray-900 mb-2">
+							<h1 className="text-3xl font-bold text-[#1F2937] mb-2">
 								{enterprise.name}
 							</h1>
-							<div className="flex items-center gap-4 text-gray-500">
+							<div className="flex items-center gap-4 text-[#6B7280]">
 								<span>📍 {enterprise.city}</span>
 								<span>📍 {enterprise.address}</span>
 							</div>
 						</div>
-						<div className="flex items-center gap-1 bg-yellow-50 px-4 py-2 rounded-full">
-							<span className="text-yellow-500 text-xl">★</span>
-							<span className="font-bold text-lg">
+						<div className="flex items-center gap-1 bg-[#F5F3FF] px-4 py-2 rounded-full border border-[#E9D5FF]">
+							<span className="text-[#EC4899] text-xl">★</span>
+							<span className="font-bold text-lg text-[#1F2937]">
 								{enterprise.average_rating?.toFixed(1) || "0.0"}
 							</span>
 						</div>
 					</div>
 
-					<p className="text-gray-600 leading-relaxed mb-6">
+					<p className="text-[#1F2937] opacity-80 leading-relaxed mb-6">
 						{enterprise.description}
 					</p>
 
 					<div className="flex flex-wrap gap-4">
-						<div className="bg-gray-50 rounded-xl px-4 py-2">
-							<span className="text-sm text-gray-500">Контакты</span>
-							<p className="font-medium">{enterprise.contacts}</p>
+						<div className="bg-[#F5F3FF] rounded-xl px-4 py-2 border border-[#E9D5FF]">
+							<span className="text-sm text-[#6B7280]">Контакты</span>
+							<p className="font-medium text-[#1F2937]">{enterprise.contacts}</p>
 						</div>
 					</div>
 				</div>
 
 				{/* Экскурсии */}
 				<div>
-					<h2 className="text-2xl font-bold text-gray-900 mb-6">
+					<h2 className="text-2xl font-bold text-[#1F2937] mb-6">
 						Экскурсии предприятия
 					</h2>
 
 					{excursions.length === 0 ? (
-						<div className="text-center py-12 text-gray-500 bg-white rounded-2xl">
+						<div className="text-center py-12 text-[#6B7280] bg-white rounded-2xl border border-[#E9D5FF] shadow-card">
 							<p>На данный момент экскурсии не проводятся</p>
 						</div>
 					) : (

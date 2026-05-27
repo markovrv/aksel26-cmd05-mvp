@@ -5,21 +5,47 @@ import {
 	getNotifications,
 	markNotificationRead,
 	getSouvenirOrders,
+	getMyReviews,
+	updateReview,
+	deleteReview,
+	updateProfile,
+	deleteProfile,
 } from "../api";
+import { useAuth } from "../context/AuthContext";
 import BookingStatusBadge from "../components/BookingStatusBadge";
 import ReviewForm from "../components/ReviewForm";
 
 function AccountB2C({ showToast }) {
+	const { user, logout } = useAuth();
 	const [activeTab, setActiveTab] = useState("bookings");
 	const [bookings, setBookings] = useState([]);
 	const [notifications, setNotifications] = useState([]);
 	const [souvenirOrders, setSouvenirOrders] = useState([]);
+	const [myReviews, setMyReviews] = useState({}); // { booking_id: review }
 	const [loading, setLoading] = useState(true);
 	const [reviewBookingId, setReviewBookingId] = useState(null);
+	const [editReviewId, setEditReviewId] = useState(null);
+	const [profileForm, setProfileForm] = useState({ full_name: "", phone: "" });
+	const [profileLoading, setProfileLoading] = useState(false);
 
 	useEffect(() => {
 		loadData();
-	}, []);
+		if (user) {
+			setProfileForm({ full_name: user.full_name || "", phone: user.phone || "" });
+		}
+	}, [user]);
+
+	// Загружаем сохранённые отзывы из localStorage как fallback
+	const loadLocalReviews = () => {
+		try {
+			const stored = localStorage.getItem("myReviews");
+			return stored ? JSON.parse(stored) : {};
+		} catch { return {}; }
+	};
+
+	const saveLocalReviews = (reviews) => {
+		localStorage.setItem("myReviews", JSON.stringify(reviews));
+	};
 
 	const loadData = async () => {
 		setLoading(true);
@@ -30,6 +56,32 @@ function AccountB2C({ showToast }) {
 			]);
 			setBookings(bookingsData);
 			setNotifications(notificationsData);
+			
+			// Пробуем получить отзывы с сервера
+			let reviewsMap = {};
+			try {
+				const reviewsData = await getMyReviews();
+				if (reviewsData && reviewsData.length > 0) {
+					reviewsData.forEach((r) => { reviewsMap[r.booking_id] = r; });
+				}
+			} catch {}
+			
+			// Если сервер не вернул отзывы — проверяем в бронированиях поле review / my_review
+			if (Object.keys(reviewsMap).length === 0) {
+				bookingsData.forEach((b) => {
+					if (b.review) reviewsMap[b.id] = b.review;
+					if (b.my_review) reviewsMap[b.id] = b.my_review;
+				});
+			}
+			
+			// Если всё ещё пусто — загружаем из localStorage
+			if (Object.keys(reviewsMap).length === 0) {
+				reviewsMap = loadLocalReviews();
+			} else {
+				saveLocalReviews(reviewsMap);
+			}
+			
+			setMyReviews(reviewsMap);
 		} catch (err) {
 			console.error("Ошибка загрузки:", err);
 		} finally {
@@ -39,7 +91,6 @@ function AccountB2C({ showToast }) {
 
 	const loadSouvenirOrders = async () => {
 		try {
-			// Получаем заказы для всех бронирований
 			const ordersPromises = bookings
 				.filter((b) => ["paid", "confirmed", "completed"].includes(b.status))
 				.map((b) => getSouvenirOrders(b.id).catch(() => []));
@@ -81,11 +132,50 @@ function AccountB2C({ showToast }) {
 		}
 	};
 
-	const handleReviewSuccess = () => {
+	// Функция создания отзыва — вызывается с явным bookingId
+	const handleCreateReview = (bookingId) => async (formData) => {
 		setReviewBookingId(null);
+		setEditReviewId(null);
+		
+		// Сохраняем отзыв в localStorage
+		const currentReviews = loadLocalReviews();
+		currentReviews[bookingId] = { 
+			id: Date.now(), 
+			booking_id: bookingId, 
+			rating: formData?.rating || 5, 
+			comment: formData?.comment || "", 
+			status: "pending" 
+		};
+		saveLocalReviews(currentReviews);
+		setMyReviews(currentReviews);
+		
 		showToast("Отзыв отправлен на модерацию", "success");
-		loadData();
 	};
+
+	// Функция обновления отзыва — вызывается с явным reviewId
+	const handleUpdateReview = (reviewId) => async (data) => {
+		try {
+			await updateReview(reviewId, data);
+			showToast("Отзыв обновлён", "success");
+			setEditReviewId(null);
+			loadData();
+		} catch (err) {
+			showToast(err.message || "Ошибка обновления", "error");
+		}
+	};
+
+	// Функция удаления отзыва
+	const handleDeleteReview = async (reviewId) => {
+		if (!confirm("Вы уверены, что хотите удалить отзыв?")) return;
+		try {
+			await deleteReview(reviewId);
+			showToast("Отзыв удалён", "success");
+			loadData();
+		} catch (err) {
+			showToast(err.message || "Ошибка удаления", "error");
+		}
+	};
+
 
 	const tabs = [
 		{ id: "bookings", label: "Бронирования" },
@@ -115,30 +205,27 @@ function AccountB2C({ showToast }) {
 	};
 
 	return (
-		<div className="min-h-screen py-8 px-4">
+		<div className="min-h-screen py-8 px-4 bg-[#F5F3FF]">
 			<div className="max-w-5xl mx-auto">
-				<h1 className="text-3xl font-bold text-gray-900 mb-8">
+				<h1 className="text-3xl font-bold text-[#1F2937] mb-8">
 					Личный кабинет
 				</h1>
 
 				{/* Вкладки */}
-				<div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+				<div className="flex bg-[#E9D5FF] rounded-xl p-1 mb-8 overflow-x-auto">
 					{tabs.map((tab) => (
 						<button
 							key={tab.id}
 							onClick={() => setActiveTab(tab.id)}
-							className={`
-                px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-colors
-                ${
-									activeTab === tab.id
-										? "bg-primary text-white"
-										: "bg-gray-100 text-gray-700 hover:bg-gray-200"
-								}
-              `}
+							className={`flex-1 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+								activeTab === tab.id
+									? "bg-white text-[#6D28D9] shadow-sm"
+									: "text-[#6B7280] hover:text-[#1F2937]"
+							}`}
 						>
 							{tab.label}
 							{tab.badge > 0 && (
-								<span className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
+								<span className="ml-2 px-2 py-0.5 bg-[#DC2626] text-white text-xs rounded-full">
 									{tab.badge}
 								</span>
 							)}
@@ -146,7 +233,6 @@ function AccountB2C({ showToast }) {
 					))}
 				</div>
 
-				{/* Содержимое вкладок */}
 				{loading ? (
 					<div className="space-y-4">
 						{[1, 2, 3].map((i) => (
@@ -159,90 +245,119 @@ function AccountB2C({ showToast }) {
 						{activeTab === "bookings" && (
 							<div>
 								{bookings.length === 0 ? (
-									<div className="text-center py-16 bg-white rounded-2xl">
-										<svg
-											className="w-16 h-16 mx-auto mb-4 text-gray-300"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												strokeLinecap="round"
-												strokeLinejoin="round"
-												strokeWidth={2}
-												d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-											/>
+									<div className="text-center py-16 bg-white rounded-2xl shadow-card border border-[#E9D5FF]">
+										<svg className="w-16 h-16 mx-auto mb-4 text-[#A855F7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
 										</svg>
-										<h3 className="text-lg font-medium text-gray-600 mb-2">
+										<h3 className="text-lg font-medium text-[#1F2937] mb-2">
 											Нет бронирований
 										</h3>
-										<p className="text-gray-500">
+										<p className="text-[#6B7280]">
 											Забронируйте экскурсию в каталоге
 										</p>
 									</div>
 								) : (
 									<div className="space-y-4">
-										{bookings.map((booking) => (
-											<div
-												key={booking.id}
-												className="bg-white rounded-2xl p-5 border border-gray-100"
-											>
-												{reviewBookingId === booking.id ? (
-													<ReviewForm
-														bookingId={booking.id}
-														onSuccess={handleReviewSuccess}
-														onCancel={() => setReviewBookingId(null)}
-													/>
-												) : (
-													<>
-														<div className="flex items-start justify-between gap-4 mb-3">
-															<div>
-																<h4 className="font-semibold text-lg">
-																	{booking.excursion_title}
-																</h4>
-																<p className="text-gray-500 text-sm">
-																	📍 {booking.enterprise_name}, {booking.city}
-																</p>
-																<p className="text-gray-500 text-sm">
-																	📅 {formatDate(booking.start_datetime)} • 👥{" "}
-																	{booking.participants_count} чел.
-																</p>
+										{bookings.map((booking) => {
+											const existingReview = myReviews[booking.id];
+											const isEditing = editReviewId === booking.id;
+											const isCreating = reviewBookingId === booking.id;
+
+											return (
+												<div
+													key={booking.id}
+													className="bg-white rounded-2xl shadow-card border border-[#E9D5FF] p-5"
+												>
+													{isCreating && !existingReview ? (
+														<ReviewForm
+															bookingId={booking.id}
+															onSuccess={handleCreateReview(booking.id)}
+															onCancel={() => setReviewBookingId(null)}
+														/>
+													) : isEditing && existingReview ? (
+														<ReviewForm
+															bookingId={booking.id}
+															initialRating={existingReview.rating}
+															initialComment={existingReview.comment}
+															onSuccess={handleUpdateReview(existingReview.id)}
+															onCancel={() => setEditReviewId(null)}
+														/>
+													) : (
+														<>
+															<div className="flex items-start justify-between gap-4 mb-3">
+																<div>
+																	<h4 className="font-semibold text-lg text-[#1F2937]">
+																		{booking.excursion_title}
+																	</h4>
+																	<p className="text-[#6B7280] text-sm">
+																		📍 {booking.enterprise_name}, {booking.city}
+																	</p>
+																	<p className="text-[#6B7280] text-sm">
+																		📅 {formatDate(booking.start_datetime)} • 👥{" "}
+																		{booking.participants_count} чел.
+																	</p>
+																</div>
+																<BookingStatusBadge status={booking.status} />
 															</div>
-															<BookingStatusBadge status={booking.status} />
-														</div>
-														<div className="flex items-center justify-between pt-3 border-t">
-															<span className="font-bold text-lg">
-																{booking.total_price.toLocaleString()} ₽
-															</span>
-															<div className="flex gap-2">
-																{canLeaveReview(booking) && (
-																	<button
-																		onClick={() =>
-																			setReviewBookingId(booking.id)
-																		}
-																		className="px-4 py-2 text-primary border border-primary rounded-xl hover:bg-blue-50 transition-colors"
-																	>
-																		Оставить отзыв
-																	</button>
-																)}
-																{["pending", "paid"].includes(
-																	booking.status,
-																) && (
-																	<button
-																		onClick={() =>
-																			handleCancelBooking(booking.id)
-																		}
-																		className="px-4 py-2 text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
-																	>
-																		Отменить
-																	</button>
-																)}
+															{existingReview && (
+																<div className="mb-3 p-3 bg-[#F5F3FF] rounded-xl border border-[#E9D5FF]">
+																	<div className="flex items-center gap-2 mb-1">
+																		<span className="text-[#EC4899] font-medium">
+																			{"★".repeat(existingReview.rating)}{"☆".repeat(5 - existingReview.rating)}
+																		</span>
+																		<span className="text-xs text-[#6B7280]">
+																			{existingReview.status === "pending" ? "(на модерации)" : existingReview.status === "approved" ? "(опубликован)" : "(отклонён)"}
+																		</span>
+																	</div>
+																	{existingReview.comment && (
+																		<p className="text-sm text-[#1F2937] opacity-80">{existingReview.comment}</p>
+																	)}
+																</div>
+															)}
+															<div className="flex items-center justify-between pt-3 border-t border-[#F5F3FF]">
+																<span className="font-bold text-lg text-[#6D28D9]">
+																	{booking.total_price.toLocaleString()} ₽
+																</span>
+																<div className="flex gap-2 flex-wrap">
+																	{canLeaveReview(booking) && !existingReview && (
+																		<button
+																			onClick={() => setReviewBookingId(booking.id)}
+																			className="px-4 py-2 border-2 border-[#6D28D9] text-[#6D28D9] rounded-xl hover:bg-[#F5F3FF] transition-colors text-sm"
+																		>
+																			Оставить отзыв
+																		</button>
+																	)}
+																	{existingReview && (
+																		<>
+																			<button
+																				onClick={() => setEditReviewId(booking.id)}
+																				className="px-4 py-2 border-2 border-[#6D28D9] text-[#6D28D9] rounded-xl hover:bg-[#F5F3FF] transition-colors text-sm"
+																			>
+																				Изменить отзыв
+																			</button>
+																			<button
+																				onClick={() => handleDeleteReview(existingReview.id)}
+																				className="px-4 py-2 border border-[#FEE2E2] text-[#DC2626] rounded-xl hover:bg-[#FEE2E2] transition-colors text-sm"
+																			>
+																				Удалить отзыв
+																			</button>
+																		</>
+																	)}
+																	{["pending", "paid"].includes(booking.status) && (
+																		<button
+																			onClick={() => handleCancelBooking(booking.id)}
+																			className="px-4 py-2 border border-[#FEE2E2] text-[#DC2626] rounded-xl hover:bg-[#FEE2E2] transition-colors text-sm"
+																		>
+																			Отменить
+																		</button>
+																	)}
+																</div>
 															</div>
-														</div>
-													</>
-												)}
-											</div>
-										))}
+														</>
+													)}
+												</div>
+											);
+										})}
 									</div>
 								)}
 							</div>
@@ -252,62 +367,51 @@ function AccountB2C({ showToast }) {
 						{activeTab === "souvenirs" && (
 							<div>
 								{souvenirOrders.length === 0 ? (
-									<div className="text-center py-16 bg-white rounded-2xl">
-										<h3 className="text-lg font-medium text-gray-600 mb-2">
+									<div className="text-center py-16 bg-white rounded-2xl shadow-card border border-[#E9D5FF]">
+										<h3 className="text-lg font-medium text-[#1F2937] mb-2">
 											Нет заказов сувениров
 										</h3>
-										<p className="text-gray-500">
+										<p className="text-[#6B7280]">
 											Закажите сувениры при бронировании экскурсии
 										</p>
 									</div>
 								) : (
-									<div className="bg-white rounded-2xl overflow-hidden">
+									<div className="bg-white rounded-2xl shadow-card border border-[#E9D5FF] overflow-hidden">
 										<table className="w-full">
-											<thead className="bg-gray-50">
+											<thead className="bg-[#F5F3FF]">
 												<tr>
-													<th className="text-left px-6 py-3 text-sm font-medium text-gray-500">
-														Название
-													</th>
-													<th className="text-left px-6 py-3 text-sm font-medium text-gray-500">
-														Кол-во
-													</th>
-													<th className="text-left px-6 py-3 text-sm font-medium text-gray-500">
-														Статус
-													</th>
-													<th className="text-right px-6 py-3 text-sm font-medium text-gray-500">
-														Цена
-													</th>
+													<th className="text-left px-6 py-3 text-sm font-medium text-[#6B7280]">Название</th>
+													<th className="text-left px-6 py-3 text-sm font-medium text-[#6B7280]">Кол-во</th>
+													<th className="text-left px-6 py-3 text-sm font-medium text-[#6B7280]">Статус</th>
+													<th className="text-right px-6 py-3 text-sm font-medium text-[#6B7280]">Цена</th>
 												</tr>
 											</thead>
-											<tbody className="divide-y">
+											<tbody className="divide-y divide-[#E9D5FF]">
 												{souvenirOrders.map((order) => (
 													<tr key={order.id}>
 														<td className="px-6 py-4">
 															<div>
-																<span className="font-medium">
-																	{order.souvenir_name}
-																</span>
+																<span className="font-medium text-[#1F2937]">{order.souvenir_name}</span>
 																{order.personalization_text && (
-																	<p className="text-sm text-gray-500">
-																		{order.personalization_text}
-																	</p>
+																	<p className="text-sm text-[#6B7280]">{order.personalization_text}</p>
 																)}
 															</div>
 														</td>
-														<td className="px-6 py-4">{order.quantity}</td>
+														<td className="px-6 py-4 text-[#1F2937]">{order.quantity}</td>
 														<td className="px-6 py-4">
-															<span
-																className={`px-3 py-1 rounded-full text-xs font-medium
-                                ${order.status === "pending" ? "bg-yellow-100 text-yellow-800" : ""}
-                                ${order.status === "confirmed" ? "bg-blue-100 text-blue-800" : ""}
-                                ${order.status === "ready_for_pickup" ? "bg-green-100 text-green-800" : ""}
-                                ${order.status === "fulfilled" ? "bg-gray-100 text-gray-800" : ""}
-                              `}
-															>
+															<span className={`px-3 py-1 rounded-full text-xs font-medium ${
+																order.status === "pending" ? "bg-[#FEF3C7] text-[#D97706]" : ""
+															} ${
+																order.status === "confirmed" ? "bg-[#DBEAFE] text-[#1D4ED8]" : ""
+															} ${
+																order.status === "ready_for_pickup" ? "bg-[#DCFCE7] text-[#16A34A]" : ""
+															} ${
+																order.status === "fulfilled" ? "bg-[#F5F3FF] text-[#6B7280]" : ""
+															}`}>
 																{order.status}
 															</span>
 														</td>
-														<td className="px-6 py-4 text-right font-medium">
+														<td className="px-6 py-4 text-right font-medium text-[#1F2937]">
 															{order.final_price.toLocaleString()} ₽
 														</td>
 													</tr>
@@ -323,8 +427,8 @@ function AccountB2C({ showToast }) {
 						{activeTab === "notifications" && (
 							<div>
 								{notifications.length === 0 ? (
-									<div className="text-center py-16 bg-white rounded-2xl">
-										<h3 className="text-lg font-medium text-gray-600 mb-2">
+									<div className="text-center py-16 bg-white rounded-2xl shadow-card border border-[#E9D5FF]">
+										<h3 className="text-lg font-medium text-[#1F2937] mb-2">
 											Нет уведомлений
 										</h3>
 									</div>
@@ -333,24 +437,22 @@ function AccountB2C({ showToast }) {
 										{notifications.map((notification) => (
 											<div
 												key={notification.id}
-												className={`bg-white rounded-xl p-4 flex items-start gap-4 ${
+												className={`bg-white rounded-xl p-4 flex items-start gap-4 border border-[#E9D5FF] ${
 													!notification.is_read
-														? "border-l-4 border-primary"
+														? "border-l-4 border-l-[#6D28D9] shadow-card"
 														: ""
 												}`}
 											>
 												<div className="flex-1">
-													<p className="font-medium">{notification.message}</p>
-													<p className="text-sm text-gray-500">
-														{new Date(
-															notification.created_at,
-														).toLocaleDateString("ru-RU")}
+													<p className="font-medium text-[#1F2937]">{notification.message}</p>
+													<p className="text-sm text-[#6B7280]">
+														{new Date(notification.created_at).toLocaleDateString("ru-RU")}
 													</p>
 												</div>
 												{!notification.is_read && (
 													<button
 														onClick={() => handleMarkRead(notification.id)}
-														className="text-sm text-primary hover:underline"
+														className="text-sm text-[#6D28D9] font-medium hover:underline"
 													>
 														Прочитано
 													</button>
@@ -364,13 +466,70 @@ function AccountB2C({ showToast }) {
 
 						{/* Профиль */}
 						{activeTab === "profile" && (
-							<div className="bg-white rounded-2xl p-6">
-								<h3 className="font-semibold text-lg mb-4">
+							<div className="bg-white rounded-2xl shadow-card border border-[#E9D5FF] p-6">
+								<h3 className="font-semibold text-lg text-[#1F2937] mb-4">
 									Информация о профиле
 								</h3>
-								<p className="text-gray-500">
-									Раздел редактирования профиля в разработке
-								</p>
+								<div className="mb-4 p-4 bg-[#F5F3FF] rounded-xl border border-[#E9D5FF]">
+									<p className="text-sm text-[#6B7280] mb-1">Email</p>
+									<p className="font-medium text-[#1F2937]">{user?.email}</p>
+								</div>
+								<div className="space-y-4 mb-6">
+									<div>
+										<label className="block text-sm font-medium text-[#1F2937] mb-1">ФИО</label>
+										<input
+											type="text"
+											value={profileForm.full_name}
+											onChange={(e) => setProfileForm({ ...profileForm, full_name: e.target.value })}
+											placeholder="Иванов Иван Иванович"
+											className="w-full border border-[#D1D5DB] rounded-xl px-4 py-3 text-[#1F2937] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-[#6D28D9] transition-all duration-150"
+										/>
+									</div>
+									<div>
+										<label className="block text-sm font-medium text-[#1F2937] mb-1">Телефон</label>
+										<input
+											type="tel"
+											value={profileForm.phone}
+											onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+											placeholder="+7 (999) 123-45-67"
+											className="w-full border border-[#D1D5DB] rounded-xl px-4 py-3 text-[#1F2937] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-[#6D28D9] transition-all duration-150"
+										/>
+									</div>
+									<button
+										onClick={async () => {
+											setProfileLoading(true);
+											try {
+												await updateProfile(profileForm);
+												showToast("Профиль обновлён", "success");
+											} catch (err) {
+												showToast(err.message || "Ошибка", "error");
+											} finally {
+												setProfileLoading(false);
+											}
+										}}
+										disabled={profileLoading}
+										className="w-full bg-[#6D28D9] hover:bg-[#7C3AED] text-white font-semibold px-6 py-3 rounded-xl shadow-btn transition-all duration-200 active:scale-95 disabled:opacity-50"
+									>
+										{profileLoading ? "Сохранение..." : "Сохранить изменения"}
+									</button>
+								</div>
+								<div className="border-t border-[#E9D5FF] pt-6">
+									<button
+										onClick={() => {
+											if (confirm("Вы уверены, что хотите удалить аккаунт? Это действие необратимо.")) {
+												deleteProfile().then(() => {
+													showToast("Аккаунт удалён", "success");
+													logout();
+												}).catch((err) => {
+													showToast(err.message || "Ошибка удаления", "error");
+												});
+											}
+										}}
+										className="w-full border-2 border-[#DC2626] text-[#DC2626] font-medium py-3 rounded-xl hover:bg-[#FEE2E2] transition-colors"
+									>
+										Удалить аккаунт
+									</button>
+								</div>
 							</div>
 						)}
 					</>

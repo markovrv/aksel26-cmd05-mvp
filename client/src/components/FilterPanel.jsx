@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-function FilterPanel({ cities = [], onFilter }) {
+function FilterPanel({ cities = [], enterprises = [], onFilter }) {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -49,10 +49,7 @@ function FilterPanel({ cities = [], onFilter }) {
 
 			{/* Filter panel */}
 			<aside className={`filter-panel ${isOpen ? "open" : ""}`}>
-				<h3
-					className="font-bold text-lg mb-5"
-					style={{ fontFamily: "'Manrope', sans-serif" }}
-				>
+				<h3 className="font-bold text-lg text-[#1F2937] mb-5">
 					Фильтры
 				</h3>
 
@@ -79,10 +76,6 @@ function FilterPanel({ cities = [], onFilter }) {
 						value={date}
 						onChange={(e) => handleChange("date", e.target.value)}
 						className="filter-select"
-						style={{
-							border: "1px solid var(--color-border)",
-							background: "white",
-						}}
 					/>
 				</div>
 
@@ -94,6 +87,11 @@ function FilterPanel({ cities = [], onFilter }) {
 						className="filter-select"
 					>
 						<option value="">Все предприятия</option>
+						{enterprises.map((ent) => (
+							<option key={ent.id} value={ent.id}>
+								{ent.name}
+							</option>
+						))}
 					</select>
 				</div>
 

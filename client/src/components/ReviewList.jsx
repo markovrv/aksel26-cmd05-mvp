@@ -3,9 +3,9 @@ import React from "react";
 function ReviewList({ reviews = [] }) {
 	if (reviews.length === 0) {
 		return (
-			<div className="text-center py-12 text-gray-500">
+			<div className="text-center py-12 text-[#6B7280]">
 				<svg
-					className="w-16 h-16 mx-auto mb-4 text-gray-300"
+					className="w-16 h-16 mx-auto mb-4 text-[#A855F7]"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -17,7 +17,7 @@ function ReviewList({ reviews = [] }) {
 						d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
 					/>
 				</svg>
-				<p className="text-lg font-medium text-gray-600 mb-1">
+				<p className="text-lg font-medium text-[#1F2937] mb-1">
 					Пока нет отзывов
 				</p>
 				<p className="text-sm">Будьте первым, кто оставит отзыв!</p>
@@ -42,10 +42,10 @@ function ReviewList({ reviews = [] }) {
 			{/* Заголовок со средним рейтингом */}
 			<div className="flex items-center gap-4 mb-6">
 				<div className="flex items-center gap-2">
-					<span className="text-4xl font-bold text-primary">
+					<span className="text-4xl font-bold text-[#6D28D9]">
 						{avgRating.toFixed(1)}
 					</span>
-					<div className="flex text-yellow-400 text-2xl">
+					<div className="flex text-[#EC4899] text-2xl">
 						{[1, 2, 3, 4, 5].map((star) => (
 							<span key={star}>
 								{star <= Math.round(avgRating) ? "★" : "☆"}
@@ -53,7 +53,7 @@ function ReviewList({ reviews = [] }) {
 						))}
 					</div>
 				</div>
-				<span className="text-gray-500">
+				<span className="text-[#6B7280]">
 					на основе {reviews.length}{" "}
 					{reviews.length === 1
 						? "отзыва"
@@ -68,22 +68,22 @@ function ReviewList({ reviews = [] }) {
 				{reviews.map((review) => (
 					<div
 						key={review.id}
-						className="bg-white rounded-2xl border border-gray-100 p-5"
+						className="bg-white rounded-2xl border border-[#E9D5FF] p-5 shadow-card"
 					>
 						<div className="flex items-start justify-between mb-3">
 							<div>
-								<span className="font-medium text-gray-900">
+								<span className="font-medium text-[#1F2937]">
 									{review.user_name}
 								</span>
-								<span className="text-gray-400 text-sm ml-2">
+								<span className="text-[#6B7280] text-sm ml-2">
 									{formatDate(review.created_at)}
 								</span>
 							</div>
-							<div className="flex text-yellow-400">
+							<div className="flex text-[#EC4899]">
 								{[1, 2, 3, 4, 5].map((star) => (
 									<span
 										key={star}
-										className={star <= review.rating ? "" : "text-gray-300"}
+										className={star <= review.rating ? "" : "text-[#D1D5DB]"}
 									>
 										★
 									</span>
@@ -91,7 +91,7 @@ function ReviewList({ reviews = [] }) {
 							</div>
 						</div>
 						{review.comment && (
-							<p className="text-gray-600 leading-relaxed">{review.comment}</p>
+							<p className="text-[#1F2937] leading-relaxed opacity-80">{review.comment}</p>
 						)}
 					</div>
 				))}

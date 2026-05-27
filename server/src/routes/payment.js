@@ -35,10 +35,10 @@ router.post("/process", authenticateToken, async (req, res) => {
 
 			switch (scenario) {
 				case "success":
-					await dbRun(
-						`UPDATE bookings SET status = 'paid', payment_id = ? WHERE id = ?`,
-						[payment_id, booking_id],
-					);
+						await dbRun(
+							`UPDATE bookings SET status = 'confirmed', payment_id = ? WHERE id = ?`,
+							[payment_id, booking_id],
+						);
 					await dbRun(
 						`INSERT INTO notifications (user_id, type, message, is_read) VALUES (?, 'payment_success', ?, 0)`,
 						[booking.user_id, `Оплата прошла успешно! Номер операции: ${payment_id}`],

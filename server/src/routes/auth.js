@@ -98,6 +98,7 @@ router.post("/login", async (req, res) => {
 				email: user.email,
 				role: user.role,
 				full_name: user.full_name,
+				phone: user.phone,
 				enterprise_id: user.enterprise_id,
 			},
 		});
@@ -108,8 +109,15 @@ router.post("/login", async (req, res) => {
 });
 
 // Получить текущего пользователя
-router.get("/me", authenticateToken, (req, res) => {
-	res.json({ user: req.user });
+router.get("/me", authenticateToken, async (req, res) => {
+	try {
+		const user = await dbGet("SELECT id, email, full_name, phone, role, enterprise_id FROM users WHERE id = ?", [req.user.id]);
+		if (!user) return res.status(404).json({ error: "Пользователь не найден" });
+		res.json({ user });
+	} catch (err) {
+		console.error("Ошибка получения пользователя:", err);
+		res.status(500).json({ error: "Ошибка при получении пользователя" });
+	}
 });
 
 // Получить список всех пользователей (admin)
@@ -161,6 +169,55 @@ router.patch(
 		}
 	},
 );
+
+// Обновить свой профиль
+router.put("/profile", authenticateToken, async (req, res) => {
+	try {
+		const { full_name, phone } = req.body;
+		const updates = [];
+		const params = [];
+
+		if (full_name) {
+			updates.push("full_name = ?");
+			params.push(full_name);
+		}
+		if (phone) {
+			updates.push("phone = ?");
+			params.push(phone);
+		}
+
+		if (updates.length === 0) {
+			return res.status(400).json({ error: "Нет данных для обновления" });
+		}
+
+		params.push(req.user.id);
+		await dbRun(
+			`UPDATE users SET ${updates.join(", ")} WHERE id = ?`,
+			params,
+		);
+
+		const user = await dbGet("SELECT id, email, full_name, phone, role, enterprise_id FROM users WHERE id = ?", [req.user.id]);
+		res.json({ message: "Профиль обновлён", user });
+	} catch (err) {
+		console.error("Ошибка обновления профиля:", err);
+		res.status(500).json({ error: "Ошибка при обновлении профиля" });
+	}
+});
+
+// Удалить свой аккаунт
+router.delete("/profile", authenticateToken, async (req, res) => {
+	try {
+		await dbRun("DELETE FROM reviews WHERE user_id = ?", [req.user.id]);
+		await dbRun("DELETE FROM notifications WHERE user_id = ?", [req.user.id]);
+		await dbRun("DELETE FROM souvenir_orders WHERE booking_id IN (SELECT id FROM bookings WHERE user_id = ?)", [req.user.id]);
+		await dbRun("DELETE FROM bookings WHERE user_id = ?", [req.user.id]);
+		await dbRun("DELETE FROM users WHERE id = ?", [req.user.id]);
+		res.json({ message: "Аккаунт удалён" });
+	} catch (err) {
+		console.error("Ошибка удаления аккаунта:", err);
+		res.status(500).json({ error: "Ошибка при удалении аккаунта" });
+	}
+});
 
 // Сменить роль пользователя (admin)
 router.patch(

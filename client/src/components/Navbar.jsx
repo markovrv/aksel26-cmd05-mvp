@@ -96,35 +96,35 @@ function Navbar({ showToast }) {
 							<div className="relative">
 								<button
 									onClick={() => setUserMenuOpen(!userMenuOpen)}
-									className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors"
+									className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[#F5F3FF] transition-colors"
 								>
 									<div className="avatar">
 										{user.full_name?.charAt(0).toUpperCase()}
 									</div>
 									{unreadCount > 0 && (
-										<span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+										<span className="absolute -top-1 -right-1 w-5 h-5 bg-[#DC2626] rounded-full text-xs text-white flex items-center justify-center">
 											{unreadCount}
 										</span>
 									)}
 								</button>
 
 								{userMenuOpen && (
-									<div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-gray-100 py-2 z-50">
-										<div className="px-4 py-2 border-b">
-											<p className="font-medium">{user.full_name}</p>
-											<p className="text-sm text-gray-500">{user.email}</p>
+									<div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-card border border-[#E9D5FF] py-2 z-50">
+										<div className="px-4 py-2 border-b border-[#E9D5FF]">
+											<p className="font-medium text-[#1F2937]">{user.full_name}</p>
+											<p className="text-sm text-[#6B7280]">{user.email}</p>
 										</div>
 										<Link
 											to={getRoleLink(user.role)}
 											onClick={() => setUserMenuOpen(false)}
-											className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+											className="block px-4 py-2 text-[#1F2937] hover:bg-[#F5F3FF]"
 										>
 											{getRoleLabel(user.role)}
 										</Link>
-										<hr className="my-2" />
+										<hr className="my-2 border-[#E9D5FF]" />
 										<button
 											onClick={handleLogout}
-											className="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-50"
+											className="w-full text-left px-4 py-2 text-[#DC2626] hover:bg-[#F5F3FF]"
 										>
 											Выйти
 										</button>

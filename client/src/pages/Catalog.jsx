@@ -86,25 +86,25 @@ function Catalog() {
 	const hasMore = excursions.length >= limit;
 
 	return (
-		<div className="min-h-screen py-8 px-4 bg-background">
+		<div className="min-h-screen py-8 px-4 bg-[#F5F3FF]">
 			<div className="max-w-7xl mx-auto">
 				<div className="mb-8">
-					<h1 className="heading-1 mb-2">Каталог экскурсий</h1>
-					<p className="text-small">
+					<h1 className="text-3xl md:text-4xl font-bold text-[#1F2937] mb-2">Каталог экскурсий</h1>
+					<p className="text-[#6B7280]">
 						Найдите идеальную экскурсию для себя и своих близких
 					</p>
 				</div>
 
 				<div className="catalog-grid">
 					{/* Фильтры */}
-					<FilterPanel cities={cities} onFilter={handleFilterChange} />
+					<FilterPanel cities={cities} enterprises={enterprises} onFilter={handleFilterChange} />
 
 					{/* Результаты */}
 					<main>
 						{loading ? (
 							<div className="excursions-grid">
 								{[1, 2, 3, 4, 5, 6].map((i) => (
-									<div key={i} className="card">
+									<div key={i} className="bg-white rounded-2xl border border-[#E9D5FF] overflow-hidden">
 										<div className="skeleton h-48 w-full"></div>
 										<div className="p-5">
 											<div className="skeleton h-6 w-3/4 mb-2"></div>
@@ -116,9 +116,9 @@ function Catalog() {
 							</div>
 						) : excursions.length === 0 ? (
 							<div className="text-center py-16">
-								<div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+								<div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F5F3FF] flex items-center justify-center">
 									<svg
-										className="w-8 h-8 text-gray-400"
+										className="w-8 h-8 text-[#A855F7]"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -131,17 +131,17 @@ function Catalog() {
 										/>
 									</svg>
 								</div>
-								<h3 className="text-lg font-semibold mb-2">
+								<h3 className="text-lg font-semibold text-[#1F2937] mb-2">
 									Ничего не найдено
 								</h3>
-								<p className="text-gray-500">
+								<p className="text-[#6B7280]">
 									Попробуйте изменить параметры поиска
 								</p>
 							</div>
 						) : (
 							<>
 								<div className="mb-6">
-									<p className="text-small">
+									<p className="text-[#6B7280]">
 										Найдено {excursions.length} экскурсий
 									</p>
 								</div>
@@ -160,7 +160,7 @@ function Catalog() {
 										<button
 											onClick={loadMore}
 											disabled={loadingMore}
-											className="btn btn-ghost"
+											className="text-[#6D28D9] font-medium hover:underline"
 										>
 											{loadingMore ? "Загрузка..." : "Загрузить ещё"}
 										</button>

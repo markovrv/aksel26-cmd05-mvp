@@ -37,10 +37,10 @@ function ProtectedRoute({ children, allowedRoles }) {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
+			<div className="min-h-screen flex items-center justify-center bg-[#F5F3FF]">
 				<div className="text-center">
-					<div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-					<p className="text-gray-500">Загрузка...</p>
+					<div className="w-12 h-12 border-4 border-[#6D28D9] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+					<p className="text-[#6B7280]">Загрузка...</p>
 				</div>
 			</div>
 		);

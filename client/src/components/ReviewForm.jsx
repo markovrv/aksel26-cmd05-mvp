@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { createReview } from "../api";
 
-function ReviewForm({ bookingId, onSuccess, onCancel }) {
-	const [rating, setRating] = useState(0);
-	const [comment, setComment] = useState("");
+function ReviewForm({ bookingId, onSuccess, onCancel, initialRating = 0, initialComment = "", onSubmit } ) {
+	const [rating, setRating] = useState(initialRating);
+	const [comment, setComment] = useState(initialComment);
 	const [hoverRating, setHoverRating] = useState(0);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
@@ -19,8 +19,12 @@ function ReviewForm({ bookingId, onSuccess, onCancel }) {
 
 		setLoading(true);
 		try {
-			await createReview({ booking_id: bookingId, rating, comment });
-			onSuccess?.();
+			if (onSubmit) {
+				await onSubmit({ rating, comment });
+			} else {
+				await createReview({ booking_id: bookingId, rating, comment });
+			}
+			onSuccess?.({ rating, comment });
 		} catch (err) {
 			setError(err.message);
 		} finally {
@@ -31,13 +35,13 @@ function ReviewForm({ bookingId, onSuccess, onCancel }) {
 	return (
 		<form
 			onSubmit={handleSubmit}
-			className="bg-white rounded-2xl border border-gray-200 p-6"
+			className="bg-white rounded-2xl border border-[#E9D5FF] shadow-card p-6"
 		>
-			<h4 className="font-semibold text-lg mb-4">Оставить отзыв</h4>
+			<h4 className="font-semibold text-lg text-[#1F2937] mb-4">{initialRating ? "Редактировать отзыв" : "Оставить отзыв"}</h4>
 
 			{/* Звёздный рейтинг */}
 			<div className="mb-4">
-				<label className="block text-sm font-medium text-gray-700 mb-2">
+				<label className="block text-sm font-medium text-[#1F2937] mb-2">
 					Оценка
 				</label>
 				<div className="flex gap-1">
@@ -52,7 +56,7 @@ function ReviewForm({ bookingId, onSuccess, onCancel }) {
 						>
 							<span
 								className={`
-                ${(hoverRating || rating) >= star ? "text-yellow-400" : "text-gray-300"}
+                ${(hoverRating || rating) >= star ? "text-[#EC4899]" : "text-[#D1D5DB]"}
               `}
 							>
 								★
@@ -64,20 +68,20 @@ function ReviewForm({ bookingId, onSuccess, onCancel }) {
 
 			{/* Комментарий */}
 			<div className="mb-4">
-				<label className="block text-sm font-medium text-gray-700 mb-2">
-					Комментарий <span className="text-gray-400">(необязательно)</span>
+				<label className="block text-sm font-medium text-[#1F2937] mb-2">
+					Комментарий <span className="text-[#6B7280]">(необязательно)</span>
 				</label>
 				<textarea
 					value={comment}
 					onChange={(e) => setComment(e.target.value)}
 					rows={4}
 					placeholder="Поделитесь впечатлениями об экскурсии..."
-					className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+					className="w-full border border-[#D1D5DB] rounded-xl px-4 py-3 text-[#1F2937] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#A855F7] focus:border-[#6D28D9] transition-all duration-150 resize-none"
 				/>
 			</div>
 
 			{error && (
-				<div className="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm">
+				<div className="mb-4 p-3 bg-[#FEE2E2] text-[#DC2626] rounded-xl text-sm">
 					{error}
 				</div>
 			)}
@@ -86,14 +90,14 @@ function ReviewForm({ bookingId, onSuccess, onCancel }) {
 				<button
 					type="submit"
 					disabled={loading}
-					className="flex-1 py-3 bg-accent text-white rounded-xl font-semibold hover:bg-accent-hover transition-colors disabled:opacity-50"
+					className="flex-1 py-3 bg-[#6D28D9] hover:bg-[#7C3AED] text-white rounded-xl font-semibold transition-colors disabled:opacity-50"
 				>
-					{loading ? "Отправка..." : "Отправить отзыв"}
+					{loading ? "Отправка..." : initialRating ? "Сохранить изменения" : "Отправить отзыв"}
 				</button>
 				<button
 					type="button"
 					onClick={onCancel}
-					className="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+					className="px-6 py-3 border-2 border-[#6D28D9] text-[#6D28D9] rounded-xl hover:bg-[#F5F3FF] transition-colors"
 				>
 					Отмена
 				</button>

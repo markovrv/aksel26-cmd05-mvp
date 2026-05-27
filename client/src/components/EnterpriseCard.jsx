@@ -8,7 +8,7 @@ function EnterpriseCard({ enterprise }) {
 			: ["https://images.unsplash.com/photo-1565514020179-026b92b84bb6?w=800"];
 
 	return (
-		<Link to={`/enterprise/${enterprise.id}`} className="card card-hover block">
+		<Link to={`/enterprise/${enterprise.id}`} className="bg-white rounded-2xl shadow-card border border-[#E9D5FF] overflow-hidden hover:shadow-hover transition-shadow block">
 			<div className="h-48 overflow-hidden">
 				<img
 					src={photos[0]}
@@ -23,20 +23,17 @@ function EnterpriseCard({ enterprise }) {
 			</div>
 			<div className="p-5">
 				<div className="flex items-start justify-between gap-2 mb-2">
-					<h3
-						className="font-semibold text-lg text-gray-900 line-clamp-1"
-						style={{ fontFamily: "'Manrope', sans-serif" }}
-					>
+					<h3 className="font-semibold text-lg text-[#1F2937] line-clamp-1">
 						{enterprise.name}
 					</h3>
 					<div className="flex items-center gap-1 shrink-0">
-						<span className="text-yellow-500">★</span>
-						<span className="font-medium text-sm">
+						<span className="text-[#EC4899]">★</span>
+						<span className="font-medium text-sm text-[#1F2937]">
 							{enterprise.average_rating?.toFixed(1) || "0.0"}
 						</span>
 					</div>
 				</div>
-				<p className="text-gray-500 text-sm mb-3">
+				<p className="text-[#6B7280] text-sm mb-3">
 					<svg
 						className="inline w-4 h-4 mr-1"
 						fill="none"
@@ -48,13 +45,10 @@ function EnterpriseCard({ enterprise }) {
 					</svg>
 					{enterprise.city}, {enterprise.address}
 				</p>
-				<p className="text-gray-600 text-sm line-clamp-2 mb-4">
+				<p className="text-[#1F2937] text-sm line-clamp-2 mb-4 opacity-70">
 					{enterprise.description}
 				</p>
-				<span
-					className="text-primary font-medium text-sm inline-flex items-center gap-1 group-hover:gap-2 transition-all"
-					style={{ fontFamily: "'Manrope', sans-serif" }}
-				>
+				<span className="text-[#6D28D9] font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all">
 					Подробнее
 					<svg
 						className="w-4 h-4"

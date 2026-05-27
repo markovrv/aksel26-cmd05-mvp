@@ -3,9 +3,9 @@ import React from "react";
 function SlotPicker({ slots, selectedSlot, onSelect, maxParticipants }) {
 	if (!slots || slots.length === 0) {
 		return (
-			<div className="text-center py-8 text-gray-500">
+			<div className="text-center py-8 text-[#6B7280]">
 				<svg
-					className="w-12 h-12 mx-auto mb-3 text-gray-300"
+					className="w-12 h-12 mx-auto mb-3 text-[#A855F7]"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -55,7 +55,7 @@ function SlotPicker({ slots, selectedSlot, onSelect, maxParticipants }) {
 		<div className="space-y-4">
 			{Object.entries(groupedSlots).map(([date, daySlots]) => (
 				<div key={date}>
-					<h4 className="font-medium text-gray-700 mb-2 text-sm">
+					<h4 className="font-medium text-[#1F2937] mb-2 text-sm">
 						{formatDate(date)}
 					</h4>
 					<div className="grid grid-cols-2 gap-2">
@@ -74,17 +74,17 @@ function SlotPicker({ slots, selectedSlot, onSelect, maxParticipants }) {
                     p-3 rounded-xl border text-left transition-all
                     ${
 											isSelected
-												? "border-primary bg-blue-50 ring-2 ring-primary"
+												? "bg-[#6D28D9] text-white border-[#6D28D9] shadow-btn"
 												: isAvailable && !isDisabled
-													? "border-gray-200 hover:border-primary hover:bg-blue-50 cursor-pointer"
-													: "border-gray-100 bg-gray-50 cursor-not-allowed opacity-60"
+													? "bg-white text-[#1F2937] border-[#E9D5FF] hover:border-[#A855F7] hover:bg-[#F5F3FF] cursor-pointer"
+													: "bg-[#F5F3FF] text-[#6B7280] border-[#E9D5FF] cursor-not-allowed opacity-60"
 										}
                   `}
 								>
-									<div className="font-medium text-gray-900">
+									<div className="font-medium">
 										{formatTime(slot.start_datetime)}
 									</div>
-									<div className="text-sm text-gray-500">
+									<div className="text-sm opacity-80">
 										{isAvailable ? (
 											<>
 												{slot.available_slots}{" "}
@@ -95,10 +95,10 @@ function SlotPicker({ slots, selectedSlot, onSelect, maxParticipants }) {
 														: "мест"}
 											</>
 										) : (
-											<span className="text-red-500">Нет мест</span>
+											<span className="text-[#DC2626]">Нет мест</span>
 										)}
 									</div>
-									<div className="text-sm font-medium text-primary mt-1">
+									<div className="text-sm font-medium mt-1 opacity-90">
 										{slot.price_per_person.toLocaleString()} ₽
 									</div>
 								</button>
