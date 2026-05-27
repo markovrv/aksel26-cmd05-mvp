@@ -155,6 +155,32 @@ router.put("/:id", authenticateToken, async (req, res) => {
 	}
 });
 
+// Получить все предприятия (admin, включая неактивные)
+router.get(
+	"/admin/all",
+	authenticateToken,
+	requireRole("admin"),
+	async (req, res) => {
+		try {
+			const enterprises = await dbAll(
+				"SELECT * FROM enterprises ORDER BY created_at DESC",
+			);
+
+			const result = enterprises.map((e) => ({
+				...e,
+				social_links: e.social_links ? JSON.parse(e.social_links) : [],
+				certificates: e.certificates ? JSON.parse(e.certificates) : [],
+				photos: e.photos ? JSON.parse(e.photos) : [],
+			}));
+
+			res.json(result);
+		} catch (err) {
+			console.error("Ошибка получения предприятий:", err);
+			res.status(500).json({ error: "Ошибка при получении списка предприятий" });
+		}
+	},
+);
+
 // Одобрить предприятие (admin)
 router.patch(
 	"/:id/activate",
@@ -169,6 +195,90 @@ router.patch(
 		} catch (err) {
 			console.error("Ошибка активации:", err);
 			res.status(500).json({ error: "Ошибка при активации" });
+		}
+	},
+);
+
+// Получить сотрудников без предприятия (admin)
+router.get(
+	"/:id/available-employees",
+	authenticateToken,
+	requireRole("admin"),
+	async (req, res) => {
+		try {
+			const employees = await dbAll(
+				`SELECT id, email, full_name FROM users
+		       WHERE role = 'b2b_employee' AND enterprise_id IS NULL
+		       ORDER BY full_name ASC`,
+			);
+			res.json(employees);
+		} catch (err) {
+			console.error("Ошибка получения сотрудников:", err);
+			res.status(500).json({ error: "Ошибка при получении списка сотрудников" });
+		}
+	},
+);
+
+// Сотрудники предприятия (admin)
+router.get(
+	"/:id/employees",
+	authenticateToken,
+	requireRole("admin"),
+	async (req, res) => {
+		try {
+			const employees = await dbAll(
+				`SELECT id, email, full_name FROM users
+		       WHERE enterprise_id = ?
+		       ORDER BY full_name ASC`,
+				[req.params.id],
+			);
+			res.json(employees);
+		} catch (err) {
+			console.error("Ошибка получения сотрудников:", err);
+			res.status(500).json({ error: "Ошибка при получении сотрудников" });
+		}
+	},
+);
+
+// Привязать сотрудника к предприятию (admin)
+router.patch(
+	"/:id/assign-employee",
+	authenticateToken,
+	requireRole("admin"),
+	async (req, res) => {
+		try {
+			const { user_id } = req.body;
+
+			const user = await dbGet(
+				"SELECT role, enterprise_id FROM users WHERE id = ?",
+				[user_id],
+			);
+
+			if (!user) {
+				return res.status(404).json({ error: "Пользователь не найден" });
+			}
+
+			if (user.role !== "b2b_employee") {
+				return res
+					.status(400)
+					.json({ error: "Только сотрудники могут быть привязаны к предприятию" });
+			}
+
+			if (user.enterprise_id) {
+				return res
+					.status(400)
+					.json({ error: "Сотрудник уже привязан к другому предприятию" });
+			}
+
+			await dbRun("UPDATE users SET enterprise_id = ? WHERE id = ?", [
+				req.params.id,
+				user_id,
+			]);
+
+			res.json({ message: "Сотрудник привязан к предприятию" });
+		} catch (err) {
+			console.error("Ошибка привязки сотрудника:", err);
+			res.status(500).json({ error: "Ошибка при привязке сотрудника" });
 		}
 	},
 );

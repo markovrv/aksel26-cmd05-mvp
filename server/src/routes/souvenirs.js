@@ -4,7 +4,42 @@ import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Витрина сувениров предприятия
+// Получить все сувениры предприятия (admin/b2b, включая недоступные)
+router.get(
+	"/manage/:enterprise_id",
+	authenticateToken,
+	async (req, res) => {
+		try {
+			const { enterprise_id } = req.params;
+
+			if (
+				req.user.role !== "admin" &&
+				req.user.enterprise_id != enterprise_id
+			) {
+				return res.status(403).json({ error: "Доступ запрещён" });
+			}
+
+			const souvenirs = await dbAll(
+				`SELECT * FROM souvenirs WHERE enterprise_id = ? ORDER BY id DESC`,
+				[enterprise_id],
+			);
+
+			const result = souvenirs.map((s) => ({
+				...s,
+				personalization_type: s.personalization_type
+					? JSON.parse(s.personalization_type)
+					: null,
+			}));
+
+			res.json(result);
+		} catch (err) {
+			console.error("Ошибка получения сувениров:", err);
+			res.status(500).json({ error: "Ошибка при получении сувениров" });
+		}
+	},
+);
+
+// Витрина сувениров предприятия (публичная)
 router.get("/:enterprise_id", async (req, res) => {
 	try {
 		const souvenirs = await dbAll(

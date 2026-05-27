@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
   role TEXT NOT NULL CHECK(role IN ('b2c','b2b_employee','admin','ministry')),
   enterprise_id INTEGER REFERENCES enterprises(id),
   consent_to_pd INTEGER NOT NULL DEFAULT 0,
+  is_blocked INTEGER DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS excursions (
   default_price REAL NOT NULL,
   max_participants INTEGER NOT NULL,
   min_participants INTEGER DEFAULT 1,
+  photo_url TEXT,
   is_active INTEGER DEFAULT 1,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

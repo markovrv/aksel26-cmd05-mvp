@@ -108,10 +108,11 @@ function Excursion({ showToast }) {
 		);
 	}
 
-	const photos =
-		excursion.enterprise_photos?.length > 0
-			? excursion.enterprise_photos
-			: ["https://images.unsplash.com/photo-1565514020179-026b92b84bb6?w=800"];
+	const heroImage =
+		excursion.photo_url ||
+		(excursion.enterprise_photos?.length > 0
+			? excursion.enterprise_photos[0]
+			: "https://images.unsplash.com/photo-1565514020179-026b92b84bb6?w=800");
 
 	return (
 		<div className="min-h-screen py-8 px-4">
@@ -123,7 +124,7 @@ function Excursion({ showToast }) {
 						<div className="bg-white rounded-2xl overflow-hidden mb-6">
 							<div className="h-64 md:h-80">
 								<img
-									src={photos[0]}
+									src={heroImage}
 									alt={excursion.title}
 									className="w-full h-full object-cover"
 								/>

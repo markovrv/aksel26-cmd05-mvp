@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { dbRun, dbGet, dbAll } from "../db/db.js";
 import { authenticateToken } from "../middleware/auth.js";
+import { requireRole } from "../middleware/roleGuard.js";
 
 const router = express.Router();
 
@@ -97,6 +98,7 @@ router.post("/login", async (req, res) => {
 				email: user.email,
 				role: user.role,
 				full_name: user.full_name,
+				enterprise_id: user.enterprise_id,
 			},
 		});
 	} catch (err) {
@@ -109,5 +111,80 @@ router.post("/login", async (req, res) => {
 router.get("/me", authenticateToken, (req, res) => {
 	res.json({ user: req.user });
 });
+
+// Получить список всех пользователей (admin)
+router.get(
+	"/users",
+	authenticateToken,
+	requireRole("admin"),
+	async (req, res) => {
+		try {
+			const users = await dbAll(
+				`SELECT id, email, full_name, phone, role, enterprise_id, created_at, is_blocked
+		       FROM users ORDER BY created_at DESC`,
+			);
+			res.json(users);
+		} catch (err) {
+			console.error("Ошибка получения пользователей:", err);
+			res.status(500).json({ error: "Ошибка при получении пользователей" });
+		}
+	},
+);
+
+// Заблокировать/разблокировать пользователя (admin)
+router.patch(
+	"/users/:id/block",
+	authenticateToken,
+	requireRole("admin"),
+	async (req, res) => {
+		try {
+			const user = await dbGet("SELECT is_blocked FROM users WHERE id = ?", [
+				req.params.id,
+			]);
+			if (!user) {
+				return res.status(404).json({ error: "Пользователь не найден" });
+			}
+
+			await dbRun("UPDATE users SET is_blocked = ? WHERE id = ?", [
+				user.is_blocked ? 0 : 1,
+				req.params.id,
+			]);
+
+			res.json({
+				message: user.is_blocked
+					? "Пользователь разблокирован"
+					: "Пользователь заблокирован",
+			});
+		} catch (err) {
+			console.error("Ошибка блокировки пользователя:", err);
+			res.status(500).json({ error: "Ошибка при блокировке пользователя" });
+		}
+	},
+);
+
+// Сменить роль пользователя (admin)
+router.patch(
+	"/users/:id/role",
+	authenticateToken,
+	requireRole("admin"),
+	async (req, res) => {
+		try {
+			const { role } = req.body;
+			if (!["b2c", "b2b_employee", "admin", "ministry"].includes(role)) {
+				return res.status(400).json({ error: "Некорректная роль" });
+			}
+
+			await dbRun("UPDATE users SET role = ? WHERE id = ?", [
+				role,
+				req.params.id,
+			]);
+
+			res.json({ message: "Роль пользователя изменена" });
+		} catch (err) {
+			console.error("Ошибка изменения роли:", err);
+			res.status(500).json({ error: "Ошибка при изменении роли" });
+		}
+	},
+);
 
 export default router;

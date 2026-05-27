@@ -17,12 +17,16 @@ export async function authenticateToken(req, res, next) {
 
 		// Получаем актуальные данные пользователя из БД
 		const user = await dbGet(
-			"SELECT id, email, role, full_name, enterprise_id FROM users WHERE id = ?",
+			"SELECT id, email, role, full_name, enterprise_id, is_blocked FROM users WHERE id = ?",
 			[decoded.id],
 		);
 
 		if (!user) {
 			return res.status(401).json({ error: "Пользователь не найден" });
+		}
+
+		if (user.is_blocked) {
+			return res.status(403).json({ error: "Учётная запись заблокирована" });
 		}
 
 		req.user = user;
@@ -46,11 +50,14 @@ export async function optionalAuth(req, res, next) {
 			process.env.JWT_SECRET || "change_me_in_production",
 		);
 		const user = await dbGet(
-			"SELECT id, email, role, full_name, enterprise_id FROM users WHERE id = ?",
+			"SELECT id, email, role, full_name, enterprise_id, is_blocked FROM users WHERE id = ?",
 			[decoded.id],
 		);
 
 		if (user) {
+			if (user.is_blocked) {
+				return next();
+		}
 			req.user = user;
 		}
 	} catch (err) {

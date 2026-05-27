@@ -123,6 +123,7 @@ router.post("/", authenticateToken, async (req, res) => {
 			default_price,
 			max_participants,
 			min_participants,
+			photo_url,
 		} = req.body;
 
 		if (req.user.role !== "admin" && req.user.enterprise_id != enterprise_id) {
@@ -144,8 +145,8 @@ router.post("/", authenticateToken, async (req, res) => {
 		}
 
 		const result = await dbRun(
-			`INSERT INTO excursions (enterprise_id, title, description, duration_minutes, default_price, max_participants, min_participants)
-	       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+			`INSERT INTO excursions (enterprise_id, title, description, duration_minutes, default_price, max_participants, min_participants, photo_url)
+	       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 			[
 				enterprise_id,
 				title,
@@ -154,6 +155,7 @@ router.post("/", authenticateToken, async (req, res) => {
 				default_price,
 				max_participants,
 				min_participants || 1,
+				photo_url,
 			],
 		);
 
@@ -192,6 +194,7 @@ router.put("/:id", authenticateToken, async (req, res) => {
 			default_price,
 			max_participants,
 			min_participants,
+			photo_url,
 		} = req.body;
 
 		await dbRun(
@@ -201,7 +204,8 @@ router.put("/:id", authenticateToken, async (req, res) => {
 	       duration_minutes = COALESCE(?, duration_minutes),
 	       default_price = COALESCE(?, default_price),
 	       max_participants = COALESCE(?, max_participants),
-	       min_participants = COALESCE(?, min_participants)
+	       min_participants = COALESCE(?, min_participants),
+		       photo_url = COALESCE(?, photo_url)
 	       WHERE id = ?`,
 			[
 				title,
@@ -210,6 +214,7 @@ router.put("/:id", authenticateToken, async (req, res) => {
 				default_price,
 				max_participants,
 				min_participants,
+				photo_url,
 				req.params.id,
 			],
 		);
@@ -252,5 +257,37 @@ router.patch("/:id/toggle", authenticateToken, async (req, res) => {
 		res.status(500).json({ error: "Ошибка при изменении статуса" });
 	}
 });
+
+// Получить экскурсии для управления (admin/b2b, включая неактивные)
+router.get(
+	"/manage/:enterprise_id",
+	authenticateToken,
+	async (req, res) => {
+		try {
+			const { enterprise_id } = req.params;
+
+			if (
+				req.user.role !== "admin" &&
+				req.user.enterprise_id != enterprise_id
+			) {
+				return res.status(403).json({ error: "Доступ запрещён" });
+			}
+
+			const excursions = await dbAll(
+				`SELECT e.*, ent.name as enterprise_name, ent.city
+		       FROM excursions e
+		       JOIN enterprises ent ON e.enterprise_id = ent.id
+		       WHERE e.enterprise_id = ?
+		       ORDER BY e.created_at DESC`,
+				[enterprise_id],
+			);
+
+			res.json(excursions);
+		} catch (err) {
+			console.error("Ошибка получения экскурсий:", err);
+			res.status(500).json({ error: "Ошибка при получении списка экскурсий" });
+		}
+	},
+);
 
 export default router;

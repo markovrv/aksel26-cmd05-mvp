@@ -57,6 +57,80 @@ export async function getEnterprise(id) {
 	return handleResponse(res);
 }
 
+export async function getAllEnterprises() {
+	const res = await fetch(`${API_BASE}/enterprises/admin/all`, {
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+	});
+	return handleResponse(res);
+}
+
+export async function createEnterprise(data) {
+	const res = await fetch(`${API_BASE}/enterprises`, {
+		method: "POST",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+		body: JSON.stringify(data),
+	});
+	return handleResponse(res);
+}
+
+export async function updateEnterprise(id, data) {
+	const res = await fetch(`${API_BASE}/enterprises/${id}`, {
+		method: "PUT",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+		body: JSON.stringify(data),
+	});
+	return handleResponse(res);
+}
+
+export async function getAvailableEmployees(enterpriseId) {
+	const res = await fetch(
+		`${API_BASE}/enterprises/${enterpriseId}/available-employees`,
+		{
+			headers: {
+				...getHeaders(),
+				Authorization: `Bearer ${window.__authToken}`,
+			},
+		},
+	);
+	return handleResponse(res);
+}
+
+export async function getEnterpriseEmployees(enterpriseId) {
+	const res = await fetch(
+		`${API_BASE}/enterprises/${enterpriseId}/employees`,
+		{
+			headers: {
+				...getHeaders(),
+				Authorization: `Bearer ${window.__authToken}`,
+			},
+		},
+	);
+	return handleResponse(res);
+}
+
+export async function assignEmployeeToEnterprise(enterpriseId, userId) {
+	const res = await fetch(
+		`${API_BASE}/enterprises/${enterpriseId}/assign-employee`,
+		{
+			method: "PATCH",
+			headers: {
+				...getHeaders(),
+				Authorization: `Bearer ${window.__authToken}`,
+			},
+			body: JSON.stringify({ user_id: userId }),
+		},
+	);
+	return handleResponse(res);
+}
+
+export async function activateEnterprise(id) {
+	const res = await fetch(`${API_BASE}/enterprises/${id}/activate`, {
+		method: "PATCH",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+	});
+	return handleResponse(res);
+}
+
 // ============ ЭКСКУРСИИ ============
 
 export async function getExcursions(params = {}) {
@@ -67,6 +141,39 @@ export async function getExcursions(params = {}) {
 
 export async function getExcursion(id) {
 	const res = await fetch(`${API_BASE}/excursions/${id}`);
+	return handleResponse(res);
+}
+
+export async function getManageExcursions(enterpriseId) {
+	const res = await fetch(`${API_BASE}/excursions/manage/${enterpriseId}`, {
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+	});
+	return handleResponse(res);
+}
+
+export async function createExcursion(data) {
+	const res = await fetch(`${API_BASE}/excursions`, {
+		method: "POST",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+		body: JSON.stringify(data),
+	});
+	return handleResponse(res);
+}
+
+export async function updateExcursion(id, data) {
+	const res = await fetch(`${API_BASE}/excursions/${id}`, {
+		method: "PUT",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+		body: JSON.stringify(data),
+	});
+	return handleResponse(res);
+}
+
+export async function toggleExcursion(id) {
+	const res = await fetch(`${API_BASE}/excursions/${id}/toggle`, {
+		method: "PATCH",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+	});
 	return handleResponse(res);
 }
 
@@ -82,6 +189,23 @@ export async function createSlot(slotData) {
 		method: "POST",
 		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
 		body: JSON.stringify(slotData),
+	});
+	return handleResponse(res);
+}
+
+export async function updateSlot(id, data) {
+	const res = await fetch(`${API_BASE}/slots/${id}`, {
+		method: "PUT",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+		body: JSON.stringify(data),
+	});
+	return handleResponse(res);
+}
+
+export async function cancelSlot(id) {
+	const res = await fetch(`${API_BASE}/slots/${id}`, {
+		method: "DELETE",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
 	});
 	return handleResponse(res);
 }
@@ -141,11 +265,35 @@ export async function getSouvenirs(enterpriseId) {
 	return handleResponse(res);
 }
 
+export async function getManageSouvenirs(enterpriseId) {
+	const res = await fetch(`${API_BASE}/souvenirs/manage/${enterpriseId}`, {
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+	});
+	return handleResponse(res);
+}
+
 export async function createSouvenir(souvenirData) {
 	const res = await fetch(`${API_BASE}/souvenirs`, {
 		method: "POST",
 		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
 		body: JSON.stringify(souvenirData),
+	});
+	return handleResponse(res);
+}
+
+export async function updateSouvenir(id, data) {
+	const res = await fetch(`${API_BASE}/souvenirs/${id}`, {
+		method: "PUT",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+		body: JSON.stringify(data),
+	});
+	return handleResponse(res);
+}
+
+export async function toggleSouvenir(id) {
+	const res = await fetch(`${API_BASE}/souvenirs/${id}/toggle`, {
+		method: "PATCH",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
 	});
 	return handleResponse(res);
 }
@@ -219,6 +367,32 @@ export async function moderateReview(id, data) {
 		method: "PATCH",
 		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
 		body: JSON.stringify(data),
+	});
+	return handleResponse(res);
+}
+
+// ============ УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ ============
+
+export async function getUsers() {
+	const res = await fetch(`${API_BASE}/auth/users`, {
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+	});
+	return handleResponse(res);
+}
+
+export async function blockUser(id) {
+	const res = await fetch(`${API_BASE}/auth/users/${id}/block`, {
+		method: "PATCH",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+	});
+	return handleResponse(res);
+}
+
+export async function changeUserRole(id, role) {
+	const res = await fetch(`${API_BASE}/auth/users/${id}/role`, {
+		method: "PATCH",
+		headers: { ...getHeaders(), Authorization: `Bearer ${window.__authToken}` },
+		body: JSON.stringify({ role }),
 	});
 	return handleResponse(res);
 }

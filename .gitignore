@@ -1,7 +1,9 @@
 node_modules/
+server/public/
 .env
-data/*.db
+data/*
 dist/
 *.log
 .DS_Store
 .claude
+package-lock.json

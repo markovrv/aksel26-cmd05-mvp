@@ -10,6 +10,14 @@ async function initDb() {
 	const db = getDb();
 	const schema = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf-8");
 	await dbExec(schema);
+
+	// Миграции для существующих БД
+	try {
+		await dbExec("ALTER TABLE users ADD COLUMN is_blocked INTEGER DEFAULT 0");
+	} catch (_e) {
+		// колонка уже существует — игнорируем
+	}
+
 	console.log("База данных инициализирована");
 	return db;
 }

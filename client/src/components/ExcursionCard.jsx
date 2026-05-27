@@ -2,10 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 function ExcursionCard({ excursion, showBadge }) {
-	const photos =
-		excursion.photos?.length > 0
-			? excursion.photos
-			: ["https://images.unsplash.com/photo-1565514020179-026b92b84bb6?w=800"];
+	const imageUrl =
+		excursion.photo_url ||
+		(excursion.photos?.length > 0
+			? excursion.photos[0]
+			: "https://images.unsplash.com/photo-1565514020179-026b92b84bb6?w=800");
 
 	return (
 		<article className="card card-hover excursion-card">
@@ -15,7 +16,7 @@ function ExcursionCard({ excursion, showBadge }) {
 				</div>
 			)}
 			<img
-				src={photos[0]}
+				src={imageUrl}
 				alt={excursion.title}
 				className="excursion-image"
 				loading="lazy"

@@ -1,7 +1,9 @@
 import { getDb, dbRun, dbGet, dbAll, dbExec } from "./db.js";
+import { initDb } from "./init-db.js";
 import bcrypt from "bcryptjs";
 
 async function seed() {
+	await initDb();
 	const db = getDb();
 
 	// Проверяем, есть ли уже данные
@@ -92,6 +94,7 @@ async function seed() {
 			default_price: 1500,
 			max_participants: 15,
 			min_participants: 5,
+			photo_url: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800",
 		},
 		{
 			enterprise_id: 1,
@@ -102,6 +105,7 @@ async function seed() {
 			default_price: 1200,
 			max_participants: 20,
 			min_participants: 5,
+			photo_url: "https://images.unsplash.com/photo-1601369820466-67de86f3bdf6?w=800",
 		},
 		{
 			enterprise_id: 2,
@@ -112,6 +116,7 @@ async function seed() {
 			default_price: 1800,
 			max_participants: 12,
 			min_participants: 3,
+			photo_url: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800",
 		},
 		{
 			enterprise_id: 2,
@@ -122,6 +127,7 @@ async function seed() {
 			default_price: 2500,
 			max_participants: 10,
 			min_participants: 5,
+			photo_url: "https://images.unsplash.com/photo-1606231031479-5f64baf0b91d?w=800",
 		},
 		{
 			enterprise_id: 3,
@@ -132,6 +138,7 @@ async function seed() {
 			default_price: 1000,
 			max_participants: 15,
 			min_participants: 5,
+			photo_url: "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800",
 		},
 		{
 			enterprise_id: 3,
@@ -142,13 +149,14 @@ async function seed() {
 			default_price: 900,
 			max_participants: 12,
 			min_participants: 4,
+			photo_url: "https://images.unsplash.com/photo-1590650046871-92c887180603?w=800",
 		},
 	];
 
 	for (const e of excursions) {
 		await dbRun(
-			`INSERT INTO excursions (enterprise_id, title, description, duration_minutes, default_price, max_participants, min_participants, is_active)
-	     VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+			`INSERT INTO excursions (enterprise_id, title, description, duration_minutes, default_price, max_participants, min_participants, photo_url, is_active)
+	     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
 			[
 				e.enterprise_id,
 				e.title,
@@ -157,6 +165,7 @@ async function seed() {
 				e.default_price,
 				e.max_participants,
 				e.min_participants,
+				e.photo_url,
 			],
 		);
 	}

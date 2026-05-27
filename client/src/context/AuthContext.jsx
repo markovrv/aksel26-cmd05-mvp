@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { login as apiLogin } from "../api";
+import { login as apiLogin, getMe } from "../api";
 
 const AuthContext = createContext(null);
 
@@ -9,16 +9,28 @@ export function AuthProvider({ children }) {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		// Проверяем, есть ли сохранённые данные в sessionStorage (fallback)
 		const savedToken = sessionStorage.getItem("authToken");
 		const savedUser = sessionStorage.getItem("authUser");
 
-		if (savedToken && savedUser) {
+		if (savedToken) {
 			setToken(savedToken);
-			setUser(JSON.parse(savedUser));
 			window.__authToken = savedToken;
+			// Подтягиваем свежие данные пользователя (включая enterprise_id)
+			getMe()
+				.then((data) => {
+					setUser(data.user);
+					sessionStorage.setItem("authUser", JSON.stringify(data.user));
+				})
+				.catch(() => {
+					// Если запрос не удался — используем сохранённые данные
+					if (savedUser) {
+						setUser(JSON.parse(savedUser));
+					}
+				})
+				.finally(() => setLoading(false));
+		} else {
+			setLoading(false);
 		}
-		setLoading(false);
 	}, []);
 
 	const login = async (email, password) => {
