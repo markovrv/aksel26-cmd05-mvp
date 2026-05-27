@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    ports:
+      - "27526:3000"
+    volumes:
+      - app_data:/app/data
+    env_file:
+      - server/.env
+volumes:
+  app_data:
