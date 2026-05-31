@@ -21,6 +21,7 @@ function Checkout({ showToast }) {
 	const [personalization, setPersonalization] = useState({});
 
 	const [consentPD, setConsentPD] = useState(false);
+	const [showPDModal, setShowPDModal] = useState(false);
 	const [bookingId, setBookingId] = useState(null);
 	const [souvenirTotal, setSouvenirTotal] = useState(0);
 
@@ -340,7 +341,7 @@ function Checkout({ showToast }) {
 								onClick={handleNextStep}
 								className="flex-1 py-3 bg-[#6D28D9] hover:bg-[#7C3AED] text-white rounded-xl font-semibold shadow-btn transition-all duration-200 active:scale-95"
 							>
-								Пропустить
+								Далее
 							</button>
 						</div>
 					</div>
@@ -397,9 +398,90 @@ function Checkout({ showToast }) {
 								className="mt-1 w-5 h-5 rounded border-[#D1D5DB] text-[#6D28D9] focus:ring-[#A855F7]"
 							/>
 							<span className="text-sm text-[#6B7280]">
-								Я согласен на обработку персональных данных
+								Я согласен на{" "}
+								<button
+									type="button"
+									onClick={(e) => {
+										e.preventDefault();
+										e.stopPropagation();
+										setShowPDModal(true);
+									}}
+									className="text-[#6D28D9] underline hover:text-[#7C3AED] font-medium"
+								>
+									обработку персональных данных
+								</button>
 							</span>
 						</label>
+
+						{/* Модальное окно согласия на обработку ПД */}
+						{showPDModal && (
+							<div
+								className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+								onClick={() => setShowPDModal(false)}
+							>
+								<div
+									className="bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 max-h-[80vh] flex flex-col"
+									onClick={(e) => e.stopPropagation()}
+								>
+									<div className="flex items-center justify-between p-6 border-b border-[#E9D5FF]">
+										<h3 className="text-lg font-bold text-[#1F2937]">
+											Согласие на обработку персональных данных
+										</h3>
+										<button
+											onClick={() => setShowPDModal(false)}
+											className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#F5F3FF] text-[#6B7280]"
+										>
+											<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+											</svg>
+										</button>
+									</div>
+									<div className="p-6 overflow-y-auto text-sm text-[#374151] space-y-4 leading-relaxed">
+										<p>
+											Настоящим я, являясь пользователем веб-сайта и/или сервисов платформы «ТЭМП» (далее — Платформа), свободно, своей волей и в своем интересе даю согласие на обработку моих персональных данных оператору Платформы (далее — Оператор).
+										</p>
+										<p>
+											<strong>Цели обработки персональных данных:</strong>
+										</p>
+										<ul className="list-disc pl-5 space-y-1">
+											<li>Регистрация и идентификация пользователя на Платформе;</li>
+											<li>Оформление и исполнение договоров бронирования экскурсий и заказа сувенирной продукции;</li>
+											<li>Связь с пользователем, направление уведомлений о статусе бронирований и заказов;</li>
+											<li>Улучшение качества обслуживания и развитие сервисов Платформы;</li>
+											<li>Статистические и аналитические исследования;</li>
+											<li>Предотвращение мошеннических действий и обеспечение безопасности.</li>
+										</ul>
+										<p>
+											<strong>Перечень персональных данных, на обработку которых дается согласие:</strong>
+										</p>
+										<ul className="list-disc pl-5 space-y-1">
+											<li>Фамилия, имя, отчество;</li>
+											<li>Номер контактного телефона;</li>
+											<li>Адрес электронной почты;</li>
+											<li>История бронирований и заказов;</li>
+											<li>Платежная информация (обрабатывается платежным шлюзом, Оператор не хранит данные банковских карт).</li>
+										</ul>
+										<p>
+											<strong>Способы обработки персональных данных:</strong> сбор, запись, систематизация, накопление, хранение, уточнение (обновление, изменение), извлечение, использование, передача (предоставление доступа), обезличивание, блокирование, удаление, уничтожение персональных данных как с использованием средств автоматизации, так и без использования таких средств.
+										</p>
+										<p>
+											<strong>Срок действия согласия:</strong> настоящее согласие действует с момента его предоставления до момента его отзыва. Я ознакомлен(а), что могу отозвать свое согласие путем направления письменного уведомления Оператору.
+										</p>
+										<p>
+											<strong>Права субъекта персональных данных:</strong> Я имею право на получение информации, касающейся обработки моих персональных данных, на уточнение, блокирование и уничтожение моих персональных данных, а также на обжалование действий или бездействия Оператора в уполномоченный орган по защите прав субъектов персональных данных.
+										</p>
+									</div>
+									<div className="p-6 border-t border-[#E9D5FF] flex justify-end">
+										<button
+											onClick={() => setShowPDModal(false)}
+											className="px-6 py-2.5 bg-[#6D28D9] hover:bg-[#7C3AED] text-white font-medium rounded-xl transition-colors"
+										>
+											Закрыть
+										</button>
+									</div>
+								</div>
+							</div>
+						)}
 
 						{bookingId && (
 							<PaymentEmulator

@@ -8,7 +8,7 @@ const router = express.Router();
 // Получить список экскурсий (публичный)
 router.get("/", async (req, res) => {
 	try {
-		const { city, date, enterprise_id } = req.query;
+		const { city, date, enterprise_id, search } = req.query;
 		let sql = `
 	      SELECT e.*, ent.name as enterprise_name, ent.city, ent.average_rating as enterprise_rating
 	      FROM excursions e
@@ -33,6 +33,19 @@ router.get("/", async (req, res) => {
 			params.push(date);
 		}
 
+		if (search) {
+			// Регистронезависимый поиск для кириллицы: заменяем каждую букву на класс символов [Аа]
+			const ciPattern = search.replace(/[а-яёa-z]/gi, (ch) => {
+				const lower = ch.toLowerCase();
+				const upper = ch.toUpperCase();
+				if (lower === upper) return ch; // не буква
+				return `[${upper}${lower}]`;
+			});
+			sql += " AND (e.title GLOB ? OR ent.name GLOB ? OR e.description GLOB ?)";
+			const globPattern = `*${ciPattern}*`;
+			params.push(globPattern, globPattern, globPattern);
+		}
+
 		sql += " ORDER BY e.created_at DESC";
 
 		const excursions = await dbAll(sql, params);
@@ -40,6 +53,28 @@ router.get("/", async (req, res) => {
 	} catch (err) {
 		console.error("Ошибка получения экскурсий:", err);
 		res.status(500).json({ error: "Ошибка при получении списка экскурсий" });
+	}
+});
+
+// Получить список дат, в которые есть свободные слоты
+router.get("/dates", async (_req, res) => {
+	try {
+		const rows = await dbAll(
+			`SELECT DISTINCT DATE(s.start_datetime) as date
+			 FROM slots s
+			 JOIN excursions e ON s.excursion_id = e.id
+			 JOIN enterprises ent ON e.enterprise_id = ent.id
+			 WHERE s.start_datetime >= datetime('now')
+			   AND s.available_slots > 0
+			   AND s.is_cancelled = 0
+			   AND e.is_active = 1
+			   AND ent.is_active = 1
+			 ORDER BY date ASC`,
+		);
+		res.json(rows.map((r) => r.date));
+	} catch (err) {
+		console.error("Ошибка получения дат экскурсий:", err);
+		res.status(500).json({ error: "Ошибка при получении дат" });
 	}
 });
 

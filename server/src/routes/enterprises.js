@@ -40,6 +40,26 @@ router.get("/", async (req, res) => {
 	}
 });
 
+// Получить статистику для главной (публичный)
+router.get("/stats/main", async (_req, res) => {
+	try {
+		const [enterpriseRow] = await dbAll("SELECT COUNT(*) as count FROM enterprises WHERE is_active = 1");
+		const [excursionRow] = await dbAll("SELECT COUNT(*) as count FROM excursions WHERE is_active = 1");
+		const [userRow] = await dbAll("SELECT COUNT(*) as count FROM users WHERE role = 'b2c' AND is_blocked = 0");
+		const [ratingRow] = await dbAll("SELECT COALESCE(AVG(average_rating), 0) as avg FROM enterprises WHERE is_active = 1 AND average_rating > 0");
+
+		res.json({
+			enterprises: enterpriseRow.count,
+			excursions: excursionRow.count,
+			users: userRow.count,
+			average_rating: Math.round(ratingRow.avg * 10) / 10,
+		});
+	} catch (err) {
+		console.error("Ошибка получения статистики:", err);
+		res.status(500).json({ error: "Ошибка при получении статистики" });
+	}
+});
+
 // Получить одно предприятие (публичный)
 router.get("/:id", async (req, res) => {
 	try {

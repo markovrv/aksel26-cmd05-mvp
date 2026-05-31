@@ -56,6 +56,8 @@ function Catalog() {
 			if (searchParams.get("date")) params.date = searchParams.get("date");
 			if (searchParams.get("enterprise_id"))
 				params.enterprise_id = searchParams.get("enterprise_id");
+			if (searchParams.get("search"))
+				params.search = searchParams.get("search");
 
 			const data = await getExcursions(params);
 

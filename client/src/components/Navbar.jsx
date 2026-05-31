@@ -71,8 +71,8 @@ function Navbar({ showToast }) {
 			<nav className="navbar">
 				<div className="navbar-inner">
 					<Link to="/" className="navbar-brand">
-						<div className="navbar-brand-icon">ПТ</div>
-						ПромТур
+						<div className="navbar-brand-icon">ТМП</div>
+						ТЭМП
 					</Link>
 
 					<ul className="navbar-nav">

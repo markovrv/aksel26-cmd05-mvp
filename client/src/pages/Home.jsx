@@ -1,25 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getEnterprises, getExcursions } from "../api";
+import { getEnterprises, getExcursions, getMainStats } from "../api";
 import ExcursionCard from "../components/ExcursionCard";
 
 function Home() {
 	const [enterprises, setEnterprises] = useState([]);
 	const [excursions, setExcursions] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const [searchQuery, setSearchQuery] = useState("");
+	const [activeCategory, setActiveCategory] = useState("Все");
+	const [scrollY, setScrollY] = useState(0);
+	const [stats, setStats] = useState({ enterprises: 0, excursions: 0, users: 0, average_rating: 0 });
 
 	useEffect(() => {
 		loadData();
 	}, []);
 
+	useEffect(() => {
+		const handleScroll = () => {
+			setScrollY(window.scrollY);
+		};
+		window.addEventListener("scroll", handleScroll, { passive: true });
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, []);
+
 	const loadData = async () => {
 		try {
-			const [entData, excData] = await Promise.all([
+			const [entData, excData, statsData] = await Promise.all([
 				getEnterprises(),
 				getExcursions(),
+				getMainStats(),
 			]);
 			setEnterprises(entData);
 			setExcursions(excData);
+			setStats(statsData);
 		} catch (err) {
 			console.error("Ошибка загрузки данных:", err);
 		} finally {
@@ -31,8 +45,14 @@ function Home() {
 		<div>
 			{/* Hero секция — тёмный градиент с городским промышленным силуэтом */}
 			<section className="hero">
-				<div className="hero-decorative hero-decorative-1"></div>
-				<div className="hero-decorative hero-decorative-2"></div>
+				<div
+					className="hero-decorative hero-decorative-1"
+					style={{ transform: `translateY(${scrollY * 0.04}px) scale(${1 - scrollY * 0.0003})` }}
+				></div>
+				<div
+					className="hero-decorative hero-decorative-2"
+					style={{ transform: `translateY(${scrollY * 0.06}px) scale(${1 - scrollY * 0.0002})` }}
+				></div>
 				<div className="hero-content">
 					<div className="hero-badge">
 						<svg
@@ -49,7 +69,7 @@ function Home() {
 					</div>
 					<h1 className="text-4xl md:text-5xl font-bold leading-tight mb-3">
 						Промышленный туризм<br />
-						<span className="bg-gradient-to-r from-[#A855F7] to-[#EC4899] bg-clip-text text-transparent">в Кировской области</span>
+						<span className="bg-gradient-to-r from-[#A855F7] to-[#EC4899] bg-clip-text text-transparent">в Российской Федерации</span>
 					</h1>
 					<p className="text-[#E9D5FF] text-lg">
 						Уникальные экскурсии по действующим предприятиям. Откройте для себя
@@ -64,18 +84,43 @@ function Home() {
 							<input
 								type="text"
 								placeholder="Поиск экскурсий"
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								onKeyDown={(e) => {
+									if (e.key === "Enter") {
+										const params = searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : "";
+										window.location.href = `/catalog${params}`;
+									}
+								}}
 								className="flex-1 outline-none text-[#1F2937] placeholder-[#6B7280]"
 							/>
 						</div>
-						<Link to="/catalog" className="bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white font-semibold px-6 py-3 rounded-xl shadow-btn hover:opacity-90 transition-all duration-200 text-center">
+						<Link to={searchQuery ? `/catalog?search=${encodeURIComponent(searchQuery)}` : "/catalog"} className="bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white font-semibold px-6 py-3 rounded-xl shadow-btn hover:opacity-90 transition-all duration-200 text-center">
 							Найти
 						</Link>
 					</div>
 					<div className="flex gap-2 mt-4 flex-wrap justify-center">
-						<span className="bg-[#6D28D9] text-white text-sm px-4 py-1.5 rounded-full font-medium">Все</span>
-						<span className="bg-white/20 text-white text-sm px-4 py-1.5 rounded-full">Заводы</span>
-						<span className="bg-white/20 text-white text-sm px-4 py-1.5 rounded-full">Фабрики</span>
-						<span className="bg-white/20 text-white text-sm px-4 py-1.5 rounded-full">Лаборатории</span>
+						{["Все", "Заводы", "Фабрики", "Лаборатории"].map((cat) => (
+							<button
+								key={cat}
+								type="button"
+								onClick={() => {
+									setActiveCategory(cat);
+									if (cat === "Все") {
+										window.location.href = "/catalog";
+									} else {
+										window.location.href = `/catalog?search=${encodeURIComponent(cat)}`;
+									}
+								}}
+								className={`text-sm px-4 py-1.5 rounded-full font-medium transition-all duration-200 ${
+									activeCategory === cat
+										? "bg-[#6D28D9] text-white"
+										: "bg-white/20 text-white hover:bg-white/30"
+								}`}
+							>
+								{cat}
+							</button>
+						))}
 					</div>
 				</div>
 			</section>
@@ -84,19 +129,19 @@ function Home() {
 			<section className="stats-section">
 				<div className="stats-grid">
 					<div className="stat-item">
-						<div className="stat-value">{enterprises.length}+</div>
+						<div className="stat-value">{stats.enterprises}</div>
 						<div className="stat-label">Предприятий</div>
 					</div>
 					<div className="stat-item">
-						<div className="stat-value">{excursions.length}+</div>
+						<div className="stat-value">{stats.excursions}</div>
 						<div className="stat-label">Экскурсий</div>
 					</div>
 					<div className="stat-item">
-						<div className="stat-value">1000+</div>
+						<div className="stat-value">{stats.users > 0 ? stats.users : "0"}</div>
 						<div className="stat-label">Посетителей</div>
 					</div>
 					<div className="stat-item">
-						<div className="stat-value">4.8</div>
+						<div className="stat-value">{stats.average_rating > 0 ? stats.average_rating : "—"}</div>
 						<div className="stat-label">Средний рейтинг</div>
 					</div>
 				</div>

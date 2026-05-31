@@ -46,6 +46,11 @@ export async function getMe() {
 
 // ============ ПРЕДПРИЯТИЯ ============
 
+export async function getMainStats() {
+	const res = await fetch(`${API_BASE}/enterprises/stats/main`);
+	return handleResponse(res);
+}
+
 export async function getEnterprises(params = {}) {
 	const query = new URLSearchParams(params).toString();
 	const res = await fetch(`${API_BASE}/enterprises${query ? `?${query}` : ""}`);
@@ -132,6 +137,11 @@ export async function activateEnterprise(id) {
 }
 
 // ============ ЭКСКУРСИИ ============
+
+export async function getExcursionDates() {
+	const res = await fetch(`${API_BASE}/excursions/dates`);
+	return handleResponse(res);
+}
 
 export async function getExcursions(params = {}) {
 	const query = new URLSearchParams(params).toString();
